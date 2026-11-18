@@ -7,8 +7,12 @@ import type { PhysioCopy, TitleParts } from './types';
  */
 export const en = {
   meta: {
-    title: 'Synapse — Home',
-    description: 'Physiotherapy clinic in Paris 10.',
+    /* SEO: keep title ≤ 60 chars and description ≤ 160 chars. */
+    title: 'Synapse | Physiotherapy Clinic in Paris 10, République',
+    description:
+      'Physiotherapy clinic in Paris 10, near République. Sports injuries, orthopaedics, pelvic health. 1-hour assessment, English-speaking physios. Book on Doctolib.',
+    ogImageAlt: 'The Synapse training area in Paris 10: a physiotherapist guiding patients through exercises',
+    ogLocale: 'en_GB',
   },
 
   common: {

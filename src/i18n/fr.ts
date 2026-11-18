@@ -3,8 +3,11 @@ import type { Dictionary } from './en';
 /** French copy. Typed against the English dictionary, so a missing key fails the build. */
 export const fr: Dictionary = {
   meta: {
-    title: 'Synapse — Accueil',
-    description: 'Cabinet de kinésithérapie à Paris 10.',
+    title: 'Synapse | Cabinet de kinésithérapie à Paris 10, République',
+    description:
+      'Cabinet de kiné à Paris 10, près de République. Blessures du sportif, orthopédie, pelvi-périnéologie. Bilan d’1 h, séances en anglais. RDV sur Doctolib.',
+    ogImageAlt: 'Le plateau technique de Synapse à Paris 10 : un kinésithérapeute accompagne des patients à l’entraînement',
+    ogLocale: 'fr_FR',
   },
 
   common: {
