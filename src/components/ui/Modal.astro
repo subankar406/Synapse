@@ -1,0 +1,94 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * Accessible modal built on native <dialog>. Open it from anywhere with
+ * `data-modal-open="<id>"` (see Button `modal` prop); the shared script in
+ * scripts/modals.ts handles opening, closing and backdrop clicks.
+ */
+interface Props {
+  id: string;
+  labelledby: string;
+  closeLabel: string;
+  size?: 'sm' | 'lg';
+  /** Split layout: media on one side (slot "media"), content on the other. */
+  split?: boolean;
+}
+
+const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
+---
+
+<dialog id={`modal-${id}`} class:list={['modal', `modal--${size}`, { 'modal--split': split }]} aria-labelledby={labelledby}>
+  {split && <div class="modal__media"><slot name="media" /></div>}
+  <div class="modal__body">
+    <button type="button" class="modal__close" data-modal-close aria-label={closeLabel}>
+      <Icon name="close" size={18} strokeWidth={2.2} />
+    </button>
+    <slot />
+  </div>
+</dialog>
+
+<style>
+  .modal {
+    width: calc(100% - 32px);
+    max-height: calc(100vh - 32px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-cream);
+    color: var(--color-text);
+    overflow: auto;
+  }
+
+  .modal::backdrop {
+    background: var(--overlay);
+  }
+
+  .modal--sm {
+    max-width: 620px;
+  }
+
+  .modal--lg {
+    max-width: 920px;
+  }
+
+  .modal[open].modal--split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  }
+
+  .modal__media {
+    position: relative;
+    min-height: 320px;
+    overflow: hidden;
+  }
+
+  .modal__body {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: clamp(28px, 4vw, 44px);
+  }
+
+  .modal--split .modal__body {
+    gap: 20px;
+    padding: clamp(24px, 4vw, 44px);
+  }
+
+  .modal__close {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line-ink-bold);
+    background: var(--color-cream);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+</style>

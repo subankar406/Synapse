@@ -1,0 +1,65 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { site } from '../../data/site';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import NeighbourhoodMap from '../map/NeighbourhoodMap.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section id="infos" labelledby="info-title" tone="white">
+  <Heading id="info-title" parts={t.practical.title} spacing={40} />
+
+  <NeighbourhoodMap lang={lang} />
+
+  <div class="contact">
+    <div class="contact__col contact__col--primary">
+      <h3 class="contact__title">{t.practical.contactTitle}</h3>
+      <span>{site.address.full}</span>
+      <span>{t.info.phone}</span>
+      <span>{t.info.email}</span>
+    </div>
+    <div class="contact__col contact__col--secondary">
+      <h3 class="contact__title">{t.practical.hoursTitle}</h3>
+      {t.practical.hoursLines.map((line) => <span>{line}</span>)}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: clamp(32px, 4vw, 56px);
+    margin-top: 48px;
+  }
+
+  .contact__col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 20px;
+    border-top: 2px solid var(--accent);
+    font-size: var(--fs-md);
+  }
+
+  .contact__col--primary {
+    --accent: var(--color-primary);
+  }
+
+  .contact__col--secondary {
+    --accent: var(--color-secondary);
+  }
+
+  .contact__title {
+    margin: 0 0 4px;
+    font-size: var(--fs-sm);
+    color: var(--accent);
+  }
+</style>

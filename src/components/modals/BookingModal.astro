@@ -1,0 +1,48 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { team } from '../../data/team';
+import Modal from '../ui/Modal.astro';
+import Button from '../ui/Button.astro';
+
+/** "Choose your physio" dialog, opened by any `data-modal-open="rdv"`. */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Modal id="rdv" labelledby="rdv-title" closeLabel={t.common.close}>
+  <h2 id="rdv-title" class="booking__title">{t.booking.title}</h2>
+  <p class="booking__intro">{t.booking.intro}</p>
+  <div class="booking__options">
+    {
+      team.map((p) => (
+        <Button href={p.doctolibUrl} variant={p.tone} size="xl" icon="external" iconSize={18} block>
+          {p.name}
+        </Button>
+      ))
+    }
+  </div>
+</Modal>
+
+<style>
+  .booking__title {
+    margin: 0;
+    padding-right: 48px;
+    font-size: var(--fs-dialog-title);
+    letter-spacing: var(--tracking-title);
+  }
+
+  .booking__intro {
+    margin: -10px 0 0;
+    font-size: var(--fs-md);
+  }
+
+  .booking__options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 12px;
+  }
+</style>

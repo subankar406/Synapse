@@ -1,0 +1,468 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { clinicPoint, pois, stations, type PoiCategory } from '../../data/map';
+import { site } from '../../data/site';
+import Icon, { type IconName } from '../ui/Icon.astro';
+import Button from '../ui/Button.astro';
+import Logo from '../ui/Logo.astro';
+import MetroLines from '../ui/MetroLines.astro';
+import MapPin from './MapPin.astro';
+import streets from './neighbourhood.svg?raw';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+
+/** Bubble look per point-of-interest category. */
+const categories: Record<PoiCategory, { icon: IconName; size: number; strokeWidth: number }> = {
+  cafe: { icon: 'cup', size: 13, strokeWidth: 2.4 },
+  restaurant: { icon: 'cutlery', size: 12, strokeWidth: 2.4 },
+  sport: { icon: 'dumbbell', size: 13, strokeWidth: 2.4 },
+  health: { icon: 'stethoscope', size: 14, strokeWidth: 2.2 },
+};
+
+const legend: Array<{ key: keyof typeof t.map.legend; category?: PoiCategory }> = [
+  { key: 'metro' },
+  { key: 'cafe', category: 'cafe' },
+  { key: 'restaurant', category: 'restaurant' },
+  { key: 'sport', category: 'sport' },
+  { key: 'health', category: 'health' },
+];
+---
+
+<div class="map-wrap" data-map-root>
+  <div class="map" role="region" aria-label={t.map.label} data-map data-far="0" data-fars="0" data-tiny="0">
+    <div class="map__inner" data-map-inner>
+      <Fragment set:html={streets} />
+
+      {
+        stations.map((s) => (
+          <MapPin x={s.x} y={s.y} placement={s.placement} class:list={['station', { 'station--near': s.nearClinic }]}>
+            <span slot="bubble" class:list={['bubble', 'bubble--metro', { 'bubble--hub': s.hub }]}>
+              {s.hub ? <Icon name="train" size={14} strokeWidth={2.2} /> : 'M'}
+            </span>
+            {s.name} <MetroLines lines={s.lines} size="sm" />
+          </MapPin>
+        ))
+      }
+
+      {
+        pois.map((p) => {
+          const c = categories[p.category];
+          return (
+            <MapPin x={p.x} y={p.y} placement={p.placement} interactive>
+              <a slot="bubble" class="poi-link" href={p.url} target="_blank" rel="noopener" aria-label={`${p.name} (${t.common.officialSite})`}>
+                <span class={`bubble bubble--${p.category}`}>
+                  <Icon name={c.icon} size={c.size} strokeWidth={c.strokeWidth} />
+                </span>
+              </a>
+              <a class="poi-name" href={p.url} target="_blank" rel="noopener" tabindex="-1">
+                {p.name}
+                <Icon name="external" size={11} strokeWidth={2.4} />
+              </a>
+            </MapPin>
+          );
+        })
+      }
+
+      <span class="clinic" style={`left: ${clinicPoint.x}%; top: ${clinicPoint.y}%`} data-clinic data-on="0">
+        <button type="button" class="clinic__dot" aria-label={t.map.clinicPin} data-clinic-toggle></button>
+        <span class="clinic__name">{site.name}</span>
+        <div class="clinic__card">
+          <Logo variant="dark" height={30} alt={site.name} />
+          <span class="clinic__address">{t.map.shortAddress}</span>
+          <Button size="xs" modal="rdv">{t.common.book}</Button>
+        </div>
+      </span>
+    </div>
+  </div>
+
+  <div class="map__controls">
+    <button type="button" aria-label={t.map.zoomIn} data-zoom="in"><Icon name="plus" size={18} strokeWidth={2.4} /></button>
+    <button type="button" aria-label={t.map.zoomOut} data-zoom="out"><Icon name="minus" size={18} strokeWidth={2.4} /></button>
+    <button type="button" aria-label={t.map.recenter} data-zoom="reset">
+      <Icon name="target" size={18} strokeWidth={2.2} color="var(--color-burgundy)" />
+    </button>
+  </div>
+
+  <Button href={site.mapsUrl} external size="xs" class="map__gmaps">
+    <Icon name="pin" size={16} />
+    {t.map.openInMaps}
+  </Button>
+</div>
+
+<div class="map-mobile-card">
+  <div class="map-mobile-card__info">
+    <Logo variant="dark" height={24} alt={site.name} />
+    <span>{t.map.shortAddress}</span>
+  </div>
+  <Button size="xs" modal="rdv" class="map-mobile-card__btn">{t.common.book}</Button>
+</div>
+
+<ul class="legend reset-list">
+  {
+    legend.map((item) => (
+      <li>
+        <span class:list={['legend__icon', `legend__icon--${item.key}`]}>
+          {item.category ? (
+            <Icon name={categories[item.category].icon} size={categories[item.category].size} strokeWidth={categories[item.category].strokeWidth} />
+          ) : (
+            'M'
+          )}
+        </span>
+        {t.map.legend[item.key]}
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  import { initMap } from '../../scripts/map';
+  document.querySelectorAll<HTMLElement>('[data-map-root]').forEach(initMap);
+</script>
+
+<style>
+  .map-wrap {
+    position: relative;
+  }
+
+  .map {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-xl);
+    background: var(--color-forest);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .map__inner {
+    position: absolute;
+  }
+
+  /* ---- Street layer (injected SVG, so selectors are global) ---- */
+  .map :global(.map__streets) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .map :global(.street) {
+    font-size: calc(11px * var(--k, 1));
+    stroke-width: calc(4px * var(--k, 1));
+    letter-spacing: calc(0.5px * var(--k, 1));
+  }
+
+  .map :global(.st-minor) {
+    font-size: calc(10px * var(--k, 1));
+  }
+
+  .map[data-fars='1'] :global(.st-minor),
+  .map[data-tiny='1'] :global(.street) {
+    display: none;
+  }
+
+  /* ---- Bubbles ---- */
+  .bubble {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--color-cream);
+  }
+
+  .bubble--metro {
+    background: var(--color-ink);
+    border: 2px solid var(--color-cream);
+    color: var(--color-cream);
+    font-size: 11px;
+    font-weight: var(--weight-bold);
+  }
+
+  .bubble--hub {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+  }
+
+  .bubble--cafe,
+  .bubble--sport {
+    color: var(--color-forest);
+  }
+
+  .bubble--health {
+    color: var(--color-burgundy);
+  }
+
+  .bubble--restaurant {
+    background: var(--color-burgundy);
+    border: 2px solid var(--color-cream);
+    color: var(--color-cream);
+  }
+
+  .poi-link {
+    display: flex;
+    text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .poi-link:hover {
+    transform: scale(1.15);
+  }
+
+  .poi-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* ---- Clinic marker ---- */
+  .clinic {
+    position: absolute;
+    z-index: 6;
+    width: 0;
+    height: 0;
+  }
+
+  .clinic__dot {
+    position: absolute;
+    left: -15px;
+    top: -15px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: var(--radius-pill);
+    border: 4px solid var(--color-cream);
+    background: var(--color-burgundy);
+    cursor: pointer;
+  }
+
+  @keyframes clinic-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(124, 2, 29, 0.55);
+    }
+    100% {
+      box-shadow: 0 0 0 18px rgba(124, 2, 29, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .clinic__dot {
+      animation: clinic-pulse 1.8s ease-out infinite;
+    }
+  }
+
+  .clinic__name {
+    position: absolute;
+    left: 0;
+    top: -26px;
+    transform: translate(-50%, -100%);
+    padding: 5px 12px;
+    border: 2px solid var(--color-cream);
+    border-radius: var(--radius-pill);
+    background: var(--color-burgundy);
+    color: var(--color-cream);
+    font-size: var(--fs-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(25, 0, 6, 0.35);
+  }
+
+  .clinic__card {
+    position: absolute;
+    left: 0;
+    top: 22px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    background: var(--color-cream);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Hover bridge so the card stays open while moving onto it. */
+  .clinic__card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -12px;
+    height: 12px;
+  }
+
+  .clinic__address {
+    font-size: var(--fs-2xs);
+    font-weight: var(--weight-bold);
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+
+  .clinic__name,
+  .clinic__card {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-fast) var(--ease),
+      visibility var(--dur-fast);
+  }
+
+  .clinic:hover .clinic__name,
+  .clinic:focus-within .clinic__name,
+  .clinic[data-on='1'] .clinic__name,
+  .clinic:hover .clinic__card,
+  .clinic:focus-within .clinic__card,
+  .clinic[data-on='1'] .clinic__card {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ---- Controls ---- */
+  .map__controls {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .map__controls button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: var(--color-cream);
+    color: var(--color-forest);
+    cursor: pointer;
+  }
+
+  .map__controls button + button {
+    border-top: 1px solid rgba(3, 81, 76, 0.15);
+  }
+
+  :global(.map__gmaps) {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ---- Mobile summary card (replaces the floating clinic card) ---- */
+  .map-mobile-card {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px;
+    border: 1.5px solid var(--color-burgundy);
+    border-radius: var(--radius-md);
+    background: var(--color-cream);
+  }
+
+  .map-mobile-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: var(--fs-2xs);
+    font-weight: var(--weight-bold);
+  }
+
+  :global(.map-mobile-card__btn) {
+    padding: 12px 18px;
+  }
+
+  /* ---- Legend ---- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin-top: 16px;
+    font-size: var(--fs-xs);
+  }
+
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legend__icon {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+  }
+
+  .legend__icon--metro {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    font-size: 11px;
+    font-weight: var(--weight-bold);
+  }
+
+  .legend__icon--cafe,
+  .legend__icon--sport {
+    background: var(--color-mint);
+    color: var(--color-forest);
+  }
+
+  .legend__icon--restaurant {
+    background: var(--color-burgundy);
+    color: var(--color-cream);
+  }
+
+  .legend__icon--health {
+    background: var(--color-blush);
+    color: var(--color-burgundy);
+  }
+
+  @media (max-width: 767px) {
+    .map {
+      aspect-ratio: 1 / 1;
+    }
+
+    .bubble {
+      width: 22px;
+      height: 22px;
+    }
+
+    .map[data-far='1'] :global(.station--near .pin__label) {
+      display: none;
+    }
+
+    .clinic__card {
+      display: none;
+    }
+
+    .map-mobile-card {
+      display: flex;
+    }
+
+    :global(.map__gmaps) {
+      position: static;
+      margin-top: 12px;
+    }
+  }
+</style>

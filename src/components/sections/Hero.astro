@@ -1,0 +1,99 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { site } from '../../data/site';
+import Heading from '../ui/Heading.astro';
+import Button from '../ui/Button.astro';
+import InfoItem from '../ui/InfoItem.astro';
+import MetroLines from '../ui/MetroLines.astro';
+import Media from '../ui/Media.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="hero__inner container">
+    <Heading as="h1" id="hero-title" size="display" parts={t.hero.title} />
+    <p class="hero__tagline">{t.hero.tagline}</p>
+
+    <div class="hero__actions">
+      <Button modal="rdv">{t.common.book}</Button>
+      <Button variant="secondary" href="#equipe">{t.hero.meetTeam}</Button>
+    </div>
+
+    <ul class="hero__facts reset-list">
+      <InfoItem icon="pin">{site.address.full}</InfoItem>
+      <InfoItem icon="metro" tone="secondary">
+        <span>
+          {
+            site.stations.map((s, i) => (
+              <>
+                {i > 0 && ' · '}
+                {s.name} <MetroLines lines={s.lines} />
+              </>
+            ))
+          }
+        </span>
+      </InfoItem>
+      <InfoItem icon="clock">{t.info.sessions}</InfoItem>
+    </ul>
+
+    <Media image="hero" alt={t.hero.imageAlt} class="hero__photo" loading="eager" />
+  </div>
+</section>
+
+<style>
+  .hero {
+    text-align: center;
+  }
+
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding-top: clamp(40px, 6vw, 72px);
+    padding-bottom: clamp(48px, 6vw, 80px);
+  }
+
+  .hero__tagline {
+    margin: 0;
+    font-size: var(--fs-lede);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 40px;
+    margin-top: 14px;
+    font-size: var(--fs-lg);
+    text-align: left;
+  }
+
+  .hero :global(.hero__photo) {
+    width: 100%;
+    margin-top: 20px;
+    aspect-ratio: 16 / 8;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+  }
+
+  @media (max-width: 767px) {
+    .hero :global(.hero__photo) {
+      aspect-ratio: 4 / 5;
+    }
+  }
+</style>

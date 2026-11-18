@@ -1,0 +1,134 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { images } from '../../data/images';
+import { hasPublicFile } from '../../lib/assets';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+const mark = images.markVision;
+---
+
+<Section id="vision" labelledby="vis-title" tone="burgundy" pad="lg" width="narrow" innerClass="vision">
+  {hasPublicFile(mark.src) && <img slot="background" class="vision__mark" src={mark.src} alt="" aria-hidden="true" />}
+
+  <Heading id="vis-title" size="vision" parts={t.vision.title} />
+  <p class="vision__lede">{t.vision.lede}</p>
+  <p class="vision__text"><strong>{t.vision.highlight}</strong></p>
+
+  <button type="button" class="vision__toggle" aria-expanded="false" aria-controls="vision-more" data-vision-toggle>
+    {t.vision.more}
+    <Icon name="chevron-down" size={16} strokeWidth={2.2} />
+  </button>
+
+  <div id="vision-more" class="vision__more" hidden>
+    {t.vision.details.map((p) => <p class="vision__text" set:html={p} />)}
+    <p class="vision__text vision__closing" set:html={t.vision.closing} />
+    <button type="button" class="vision__toggle" aria-expanded="true" aria-controls="vision-more" data-vision-toggle>
+      {t.vision.less}
+      <Icon name="chevron-up" size={16} strokeWidth={2.2} />
+    </button>
+  </div>
+
+  <Button variant="cream" size="md" modal="rdv" class="vision__cta">{t.common.book}</Button>
+</Section>
+
+<script>
+  // "Learn more" sits before the panel, "Show less" at its end; only one is visible at a time.
+  const panel = document.getElementById('vision-more');
+  const [more] = document.querySelectorAll<HTMLButtonElement>('[data-vision-toggle]');
+
+  document.querySelectorAll<HTMLButtonElement>('[data-vision-toggle]').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      if (!panel || !more) return;
+      const open = panel.hidden;
+      panel.hidden = !open;
+      more.hidden = open;
+      more.setAttribute('aria-expanded', String(open));
+      if (!open) more.focus();
+    });
+  });
+</script>
+
+<style>
+  :global(.vision) {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .vision__mark {
+    position: absolute;
+    width: 620px;
+    height: auto;
+    right: -160px;
+    top: -140px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .vision__lede {
+    margin: 0;
+    font-size: var(--fs-lede-lg);
+    line-height: 1.42;
+    letter-spacing: -0.01em;
+  }
+
+  .vision__text {
+    margin: 0;
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+    color: var(--color-on-dark-muted);
+  }
+
+  .vision__text :global(strong) {
+    color: var(--color-on-dark);
+  }
+
+  .vision__more {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .vision__more[hidden] {
+    display: none;
+  }
+
+  .vision__closing {
+    padding-top: 28px;
+    border-top: 1px solid var(--line-cream-strong);
+  }
+
+  .vision__toggle {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-cream);
+    background: none;
+    font: inherit;
+    font-size: var(--fs-md);
+    font-weight: var(--weight-bold);
+    color: var(--color-cream);
+    cursor: pointer;
+  }
+
+  .vision__toggle[hidden] {
+    display: none;
+  }
+
+  :global(.vision__cta) {
+    align-self: flex-start;
+    margin-top: 6px;
+  }
+</style>

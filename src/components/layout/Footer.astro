@@ -1,0 +1,138 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { sections, site } from '../../data/site';
+import Logo from '../ui/Logo.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<footer class="footer">
+  <div class="footer__grid container">
+    <div class="footer__brand">
+      <Logo variant="light" height={36} alt={site.name} />
+      <p class="footer__tagline">{t.footer.tagline}</p>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__title">{t.footer.locationTitle}</h3>
+      <span>{site.address.street}</span>
+      <span>{site.address.city}</span>
+      <button type="button" class="footer__link-btn" data-modal-open="rdv">{t.common.bookArrow}</button>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__title">{t.footer.contactTitle}</h3>
+      <span>{t.info.phone}</span>
+      <span>{t.info.email}</span>
+    </div>
+
+    <nav class="footer__col" aria-label={t.footer.sitemapLabel}>
+      <h3 class="footer__title">{t.footer.sitemapTitle}</h3>
+      {sections.map((id) => <a href={`#${id}`}>{t.nav.items[id]}</a>)}
+    </nav>
+  </div>
+
+  <div class="footer__legal container">
+    <span class="footer__copyright">{t.footer.copyright}</span>
+    <div class="footer__legal-links">
+      <span>{t.footer.rpps}</span>
+      <a href={site.orderUrl}>{t.footer.order}</a>
+      <a href={site.legalUrl}>{t.footer.legal}</a>
+      <a href={site.privacyUrl}>{t.footer.privacy}</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-ink);
+    color: var(--color-cream);
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 44px 40px;
+    align-items: start;
+    padding-top: 72px;
+    padding-bottom: 56px;
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .footer__brand :global(.logo) {
+    align-self: flex-start;
+  }
+
+  .footer__tagline {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: rgba(253, 241, 226, 0.8);
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: var(--fs-sm);
+  }
+
+  .footer__col a {
+    color: var(--color-cream);
+    text-decoration: none;
+  }
+
+  .footer__title {
+    margin: 0 0 6px;
+    font-size: var(--fs-3xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-rose);
+  }
+
+  .footer__link-btn {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--color-cream);
+    cursor: pointer;
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px 32px;
+    padding-top: 24px;
+    padding-bottom: 40px;
+    border-top: 1px solid var(--line-cream-soft);
+    font-size: var(--fs-2xs);
+    color: rgba(253, 241, 226, 0.7);
+  }
+
+  .footer__copyright {
+    font-weight: var(--weight-bold);
+  }
+
+  .footer__legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+  }
+
+  .footer__legal-links a {
+    color: rgba(253, 241, 226, 0.7);
+    text-decoration: none;
+  }
+</style>

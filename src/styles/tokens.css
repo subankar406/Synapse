@@ -1,0 +1,122 @@
+/*
+ * Design tokens — the single source of truth for every colour, font,
+ * size, radius and shadow on the site. Components reference these
+ * variables only; never hard-code a value that belongs here.
+ */
+:root {
+  /* ---------- Brand palette ---------- */
+  --color-burgundy: #7c021d;
+  --color-forest: #03514c;
+  --color-forest-deep: #02413d;
+  --color-ink: #190006;
+  --color-cream: #fdf1e2;
+  --color-white: #ffffff;
+  --color-mint: #e6eeed;
+  --color-blush: #f2e6e8;
+  --color-rose: #d8b3bb;
+  --color-sage: #b3cbc9;
+  --color-stone: #65605a;
+
+  /* ---------- Semantic roles ---------- */
+  --color-bg: var(--color-cream);
+  --color-surface: var(--color-white);
+  --color-text: var(--color-ink);
+  --color-primary: var(--color-burgundy);
+  --color-primary-hover: var(--color-ink);
+  --color-secondary: var(--color-forest);
+  --color-secondary-hover: var(--color-forest-deep);
+  --color-on-dark: var(--color-cream);
+  --color-on-dark-muted: var(--color-blush);
+  --color-focus: var(--color-forest);
+
+  --line-ink: rgba(25, 0, 6, 0.12);
+  --line-ink-strong: rgba(25, 0, 6, 0.15);
+  --line-ink-bold: rgba(25, 0, 6, 0.2);
+  --line-cream: rgba(253, 241, 226, 0.25);
+  --line-cream-soft: rgba(253, 241, 226, 0.15);
+  --line-cream-strong: rgba(253, 241, 226, 0.3);
+  --overlay: rgba(25, 0, 6, 0.6);
+
+  /* ---------- Paris metro / RER line colours ---------- */
+  --line-2: #216eb4;
+  --line-3: #9f9825;
+  --line-4: #bb4d98;
+  --line-5: #f28e42;
+  --line-7: #fa9aba;
+  --line-7b: #6eca97;
+  --line-8: #ceadd2;
+  --line-9: #d5c900;
+  --line-11: #8d5e2a;
+  --line-rer-b: #5291ce;
+  --line-rer-d: #00814f;
+  --line-rer-e: #c04191;
+
+  /* ---------- Typography ---------- */
+  --font-sans: 'Alte Haas Grotesk', 'Inter Tight', Helvetica, Arial, sans-serif;
+  --weight-regular: 400;
+  --weight-bold: 700;
+
+  --fs-display: clamp(22px, 6vw, 80px);
+  --fs-cta: clamp(38px, 5.6vw, 72px);
+  --fs-h2-vision: clamp(36px, 4.8vw, 64px);
+  --fs-h2: clamp(34px, 4.6vw, 60px);
+  --fs-h2-wide: clamp(22px, 3.3vw, 44px);
+  --fs-modal-title: 36px;
+  --fs-card-title: 34px;
+  --fs-dialog-title: 30px;
+  --fs-lede: clamp(20px, 2vw, 24px);
+  --fs-lede-lg: clamp(21px, 2.2vw, 26px);
+  --fs-h3: 24px;
+  --fs-menu: 22px;
+  --fs-xl: 19px;
+  --fs-lg: 18px;
+  --fs-md: 17px;
+  --fs-base: 16px;
+  --fs-sm: 15px;
+  --fs-xs: 14px;
+  --fs-2xs: 13px;
+  --fs-3xs: 12px;
+
+  --lh-tight: 1;
+  --lh-heading: 1.02;
+  --lh-snug: 1.12;
+  --lh-body: 1.55;
+  --lh-relaxed: 1.65;
+
+  --tracking-display: -0.045em;
+  --tracking-heading: -0.035em;
+  --tracking-title: -0.02em;
+  --tracking-caps: 0.06em;
+  --tracking-eyebrow: 0.2em;
+
+  /* ---------- Layout ---------- */
+  --container: 1280px;
+  --container-narrow: 860px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --section-pad: clamp(64px, 9vw, 120px);
+  --section-pad-sm: clamp(64px, 8vw, 104px);
+  --section-pad-lg: clamp(72px, 10vw, 128px);
+  --section-pad-xl: clamp(80px, 11vw, 136px);
+  --header-offset: 84px;
+
+  /* ---------- Shape ---------- */
+  --radius-pill: 999px;
+  --radius-xl: 28px;
+  --radius-lg: 24px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --radius-xs: 8px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-sm: 0 4px 12px rgba(25, 0, 6, 0.3);
+  --shadow-md: 0 4px 14px rgba(25, 0, 6, 0.25);
+  --shadow-float: 0 6px 20px rgba(25, 0, 6, 0.2);
+  --shadow-float-strong: 0 6px 20px rgba(25, 0, 6, 0.25);
+  --shadow-card: 0 10px 28px rgba(25, 0, 6, 0.3);
+
+  /* ---------- Motion ---------- */
+  --ease: ease;
+  --dur-fast: 0.2s;
+  --dur: 0.25s;
+  --dur-slow: 0.35s;
+}

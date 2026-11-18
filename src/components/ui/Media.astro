@@ -1,0 +1,57 @@
+---
+import { hasPublicFile } from '../../lib/assets';
+import { images, type ImageKey } from '../../data/images';
+
+/**
+ * An image from the `images` registry. If the file hasn't been added to
+ * /public yet, renders a tinted placeholder of the same size instead, so
+ * layouts hold their shape while assets are pending.
+ */
+interface Props {
+  image: ImageKey;
+  alt: string;
+  class?: string;
+  /** Small caption shown on the placeholder (e.g. "Portrait · Louis"). */
+  placeholderLabel?: string;
+  /** Force the placeholder even if the file exists (design shows a flat tile). */
+  flat?: boolean;
+  loading?: 'lazy' | 'eager';
+}
+
+const { image, alt, class: className, placeholderLabel, flat = false, loading = 'lazy' } = Astro.props;
+const spec = images[image];
+const hasFile = !flat && hasPublicFile(spec.src);
+---
+
+{
+  hasFile ? (
+    <img class:list={['media', className]} src={spec.src} alt={alt} loading={loading} decoding="async" />
+  ) : (
+    <div
+      class:list={['media', 'media--placeholder', className]}
+      style={`--placeholder: ${spec.placeholder}`}
+      role={alt ? 'img' : undefined}
+      aria-label={alt || undefined}
+      aria-hidden={alt ? undefined : 'true'}
+    >
+      {placeholderLabel && <span class="media__label">{placeholderLabel}</span>}
+    </div>
+  )
+}
+
+<style>
+  .media--placeholder {
+    position: relative;
+    background: var(--placeholder);
+  }
+
+  .media__label {
+    position: absolute;
+    left: 22px;
+    bottom: 20px;
+    font-size: var(--fs-3xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+</style>

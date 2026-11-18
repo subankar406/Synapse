@@ -1,0 +1,133 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
+
+/**
+ * Pill button. Renders an <a> when `href` is set, otherwise a <button>.
+ * Pass `modal="rdv"` (etc.) to open a <Modal id="rdv"> on click.
+ */
+type Variant = 'primary' | 'secondary' | 'cream';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+interface Props {
+  variant?: Variant;
+  size?: Size;
+  href?: string;
+  external?: boolean;
+  modal?: string;
+  icon?: IconName;
+  iconSize?: number;
+  /** Stretch to fill its container (with the icon pushed to the far end). */
+  block?: boolean;
+  class?: string;
+  'aria-label'?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'lg',
+  href,
+  external = false,
+  modal,
+  icon,
+  iconSize = 16,
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, block && 'btn--block', className];
+const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+{
+  href ? (
+    <a class:list={classes} href={href} {...linkAttrs} {...rest}>
+      <slot />
+      {icon && <Icon name={icon} size={iconSize} />}
+    </a>
+  ) : (
+    <button class:list={classes} type="button" data-modal-open={modal} {...rest}>
+      <slot />
+      {icon && <Icon name={icon} size={iconSize} strokeWidth={2.2} />}
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    font: inherit;
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    transition:
+      transform var(--dur) var(--ease),
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    background: var(--btn-bg-hover);
+    color: var(--btn-fg-hover);
+  }
+
+  .btn--primary {
+    --btn-bg: var(--color-primary);
+    --btn-fg: var(--color-on-dark);
+    --btn-bg-hover: var(--color-primary-hover);
+    --btn-fg-hover: var(--color-on-dark);
+  }
+
+  .btn--secondary {
+    --btn-bg: var(--color-secondary);
+    --btn-fg: var(--color-on-dark);
+    --btn-bg-hover: var(--color-secondary-hover);
+    --btn-fg-hover: var(--color-on-dark);
+  }
+
+  .btn--cream {
+    --btn-bg: var(--color-cream);
+    --btn-fg: var(--color-primary);
+    --btn-bg-hover: var(--color-white);
+    --btn-fg-hover: var(--color-primary);
+  }
+
+  .btn--xs {
+    padding: 10px 18px;
+    font-size: var(--fs-xs);
+  }
+
+  .btn--sm {
+    padding: 14px 22px;
+    font-size: var(--fs-sm);
+  }
+
+  .btn--md {
+    padding: 14px 26px;
+    font-size: var(--fs-base);
+  }
+
+  .btn--lg {
+    padding: 18px 32px;
+    font-size: var(--fs-md);
+  }
+
+  .btn--xl {
+    padding: 20px 24px;
+    font-size: var(--fs-base);
+  }
+
+  .btn--block {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+</style>

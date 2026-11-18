@@ -1,0 +1,78 @@
+---
+import { formatPrice, getDictionary, type Locale } from '../../i18n';
+import { prices } from '../../data/content';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section id="tarifs" labelledby="tarifs-title" pad="sm" innerClass="split">
+  <Heading id="tarifs-title" parts={t.pricing.title} />
+
+  <div class="prices">
+    <table class="prices__table">
+      <caption class="visually-hidden">{t.pricing.caption}</caption>
+      <tbody>
+        {
+          prices.map((row) => (
+            <tr>
+              <th scope="row">{t.pricing.items[row.key]}</th>
+              <td class="prices__duration">{row.duration}</td>
+              <td class="prices__amount">{formatPrice(row.amount, lang)}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</Section>
+
+<style>
+  .prices {
+    padding: 12px clamp(20px, 3vw, 36px);
+    border-radius: var(--radius-xl);
+    background: var(--color-forest);
+    color: var(--color-cream);
+  }
+
+  .prices__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-lg);
+  }
+
+  .prices__table th,
+  .prices__table td {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line-cream);
+    font-weight: var(--weight-regular);
+    text-align: left;
+  }
+
+  .prices__table tr:last-child th,
+  .prices__table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .prices__duration {
+    color: var(--color-sage);
+  }
+
+  .prices__table .prices__amount {
+    text-align: right;
+    font-size: 22px;
+    font-weight: var(--weight-bold);
+  }
+
+  @media (max-width: 767px) {
+    .prices__table .prices__amount {
+      font-size: var(--fs-xl);
+    }
+  }
+</style>

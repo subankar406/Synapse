@@ -1,0 +1,76 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section id="faq" labelledby="faq-title" innerClass="split">
+  <Heading id="faq-title" parts={t.faq.title} />
+
+  <div class="faq">
+    {
+      t.faq.items.map((item, i) => (
+        <details class="faq__item" open={i === 0}>
+          <summary class="faq__question">
+            {item.q}
+            <span class:list={['faq__icon', i % 2 === 0 ? 'tone-primary' : 'tone-secondary']} aria-hidden="true">
+              <Icon name="plus" size={20} strokeWidth={2.2} />
+            </span>
+          </summary>
+          <p class="faq__answer">{item.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .faq {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--line-ink-strong);
+  }
+
+  .faq__item {
+    border-bottom: 1px solid var(--line-ink-strong);
+  }
+
+  .faq__question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 0;
+    list-style: none;
+    cursor: pointer;
+    font-size: var(--fs-xl);
+    font-weight: var(--weight-bold);
+  }
+
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__icon {
+    flex: none;
+    display: flex;
+    transition: transform 0.3s var(--ease);
+  }
+
+  .faq__item[open] .faq__icon {
+    transform: rotate(45deg);
+  }
+
+  .faq__answer {
+    max-width: 60ch;
+    margin: 0 0 22px;
+  }
+</style>

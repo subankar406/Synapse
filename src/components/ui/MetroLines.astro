@@ -1,0 +1,63 @@
+---
+import { metroLines, type MetroLineId } from '../../data/metro';
+
+/** Row of metro/RER line badges in their official colours. */
+interface Props {
+  lines: readonly MetroLineId[];
+  size?: 'md' | 'sm';
+}
+
+const { lines, size = 'md' } = Astro.props;
+---
+
+{
+  lines.map((id) => {
+    const line = metroLines[id] as { token: string; light?: boolean; rer?: boolean; small?: boolean };
+    return (
+      <b
+        class:list={['line', `line--${size}`, { 'line--light': line.light, 'line--rer': line.rer, 'line--tiny': line.small }]}
+        style={`--line-bg: var(${line.token})`}
+      >
+        {id}
+      </b>
+    );
+  })
+}
+
+<style>
+  .line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--line-bg);
+    color: var(--color-ink);
+    font-size: var(--fs-3xs);
+    font-weight: var(--weight-bold);
+    vertical-align: middle;
+    text-shadow: none;
+  }
+
+  .line--sm {
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
+    font-size: 10px;
+  }
+
+  .line--light,
+  .line--rer {
+    color: var(--color-white);
+  }
+
+  .line--rer {
+    border-radius: 5px;
+  }
+
+  .line--tiny {
+    font-size: 8px;
+  }
+</style>

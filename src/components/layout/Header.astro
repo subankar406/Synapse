@@ -1,0 +1,148 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import { sections } from '../../data/site';
+import Logo from '../ui/Logo.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import LangSwitch from './LangSwitch.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<header class="header" data-header>
+  <div class="header__bar container">
+    <a class="header__home" href="#top" aria-label={t.common.homeLabel}>
+      <Logo variant="light" height={34} />
+    </a>
+
+    <nav class="header__nav" aria-label={t.nav.label}>
+      {sections.map((id) => <a class="navlink" href={`#${id}`}>{t.nav.items[id]}</a>)}
+    </nav>
+
+    <div class="header__actions">
+      <LangSwitch lang={lang} class="hide-mobile" />
+      <Button variant="cream" size="md" modal="rdv" class="hide-mobile">{t.common.book}</Button>
+      <button class="header__menu-btn" type="button" aria-label={t.common.menu} aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+        <Icon name="menu" size={20} />
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" class="header__mobile container" aria-label={t.common.menu} hidden>
+    {sections.map((id) => <a class="navlink" href={`#${id}`} data-menu-close>{t.nav.items[id]}</a>)}
+    <LangSwitch lang={lang} compact />
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-menu');
+
+  const setOpen = (open: boolean) => {
+    if (!toggle || !menu) return;
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle?.addEventListener('click', () => setOpen(menu?.hidden ?? false));
+  menu?.querySelectorAll('[data-menu-close]').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('modal:open', () => setOpen(false));
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--color-burgundy);
+    color: var(--color-cream);
+  }
+
+  .header :global(a:focus-visible),
+  .header :global(button:focus-visible) {
+    outline-color: var(--color-cream);
+  }
+
+  .header__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 16px;
+  }
+
+  .header__home {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .header__nav {
+    display: flex;
+    gap: 30px;
+    font-size: var(--fs-md);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .navlink {
+    color: var(--color-cream);
+    text-decoration: none;
+  }
+
+  .navlink:hover {
+    color: var(--color-white);
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .header__menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(253, 241, 226, 0.5);
+    background: transparent;
+    color: var(--color-cream);
+    cursor: pointer;
+  }
+
+  .header__mobile {
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: 24px;
+    border-top: 1px solid rgba(253, 241, 226, 0.2);
+    font-size: var(--fs-menu);
+    font-weight: var(--weight-bold);
+  }
+
+  .header__mobile[hidden] {
+    display: none;
+  }
+
+  .header__mobile .navlink {
+    padding: 12px 0;
+  }
+
+  @media (max-width: 1180px) {
+    .header__nav {
+      display: none;
+    }
+
+    .header__menu-btn {
+      display: inline-flex;
+    }
+  }
+</style>

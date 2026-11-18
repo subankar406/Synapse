@@ -1,0 +1,62 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+import type { Tone } from '../../i18n/types';
+
+/**
+ * Icon + text row (address, metro, hours…). With `label`, renders a
+ * small coloured label above the content.
+ */
+interface Props {
+  icon: IconName;
+  tone?: Tone;
+  label?: string;
+}
+
+const { icon, tone = 'primary', label } = Astro.props;
+---
+
+<li class:list={['info-item', { 'info-item--labelled': label }]}>
+  <span class="info-item__icon"><Icon name={icon} size={26} color={`var(--color-${tone})`} /></span>
+  {
+    label ? (
+      <div>
+        <strong class={`info-item__label tone-${tone}`}>{label}</strong>
+        <span class="info-item__text">
+          <slot />
+        </span>
+      </div>
+    ) : (
+      <slot />
+    )
+  }
+</li>
+
+<style>
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .info-item--labelled {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .info-item__icon {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 1px;
+  }
+
+  .info-item__label {
+    display: block;
+    font-size: var(--fs-sm);
+  }
+
+  .info-item__text {
+    font-size: var(--fs-md);
+  }
+</style>

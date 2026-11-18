@@ -1,0 +1,90 @@
+---
+import { getDictionary, type Locale } from '../../i18n';
+import type { Physio } from '../../data/team';
+import Modal from '../ui/Modal.astro';
+import Media from '../ui/Media.astro';
+import Button from '../ui/Button.astro';
+import DatedList from '../ui/DatedList.astro';
+
+/** Full profile of one physio, opened by `data-modal-open="<physio id>"`. */
+interface Props {
+  lang: Locale;
+  physio: Physio;
+}
+
+const { lang, physio } = Astro.props;
+const t = getDictionary(lang);
+const copy = t.physio[physio.id];
+const titleId = `${physio.id}-title`;
+---
+
+<Modal id={physio.id} labelledby={titleId} closeLabel={t.common.close} size="lg" split>
+  <Media
+    slot="media"
+    image={physio.image}
+    alt={copy.portraitAlt}
+    class={`profile__portrait profile__portrait--${physio.id}`}
+    placeholderLabel={`${t.team.portraitPlaceholder} · ${physio.firstName}`}
+  />
+
+  <div>
+    <h2 id={titleId} class="profile__name">{physio.name}</h2>
+    <p class="profile__role">{copy.title}{t.physio.rppsSuffix}</p>
+  </div>
+
+  {copy.intro.map((p) => <p class="profile__text" set:html={p} />)}
+  <h3 class="profile__subheading">{copy.subheading}</h3>
+  {copy.body.map((p) => <p class="profile__text" set:html={p} />)}
+
+  <DatedList title={t.physio.degreeTitle} tone="primary" items={copy.degree} />
+  <DatedList title={copy.experienceTitle} tone="secondary" items={copy.experience} />
+  <DatedList title={t.physio.trainingsTitle} tone="primary" items={copy.trainings} />
+
+  <Button href={physio.doctolibUrl} variant={physio.tone} size="sm" icon="external" class="profile__book">
+    {copy.bookLabel}
+  </Button>
+</Modal>
+
+<style>
+  :global(.profile__portrait) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    background: var(--color-white);
+  }
+
+  :global(.profile__portrait.media--placeholder) {
+    background: var(--placeholder);
+  }
+
+  .profile__name {
+    margin: 0;
+    font-size: var(--fs-modal-title);
+    letter-spacing: var(--tracking-title);
+  }
+
+  .profile__role {
+    margin: 4px 0 0;
+    font-size: var(--fs-sm);
+  }
+
+  .profile__text {
+    margin: 0;
+    font-size: var(--fs-base);
+    line-height: 1.6;
+  }
+
+  .profile__subheading {
+    margin: 8px 0 -8px;
+    font-size: var(--fs-lg);
+    color: var(--color-secondary);
+  }
+
+  :global(.profile__book) {
+    align-self: flex-start;
+    padding: 15px 24px;
+  }
+</style>

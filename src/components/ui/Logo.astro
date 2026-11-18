@@ -1,0 +1,53 @@
+---
+import { hasPublicFile } from '../../lib/assets';
+import { images } from '../../data/images';
+import { site } from '../../data/site';
+
+/**
+ * Synapse logo. `light` = cream logo for dark backgrounds, `dark` = for
+ * cream backgrounds. Falls back to a typeset wordmark until the logo file
+ * is added to /public.
+ */
+interface Props {
+  variant?: 'light' | 'dark';
+  height?: number;
+  alt?: string;
+  class?: string;
+}
+
+const { variant = 'light', height = 34, alt = '', class: className } = Astro.props;
+const spec = images[variant === 'light' ? 'logoLight' : 'logoDark'];
+const hasFile = hasPublicFile(spec.src);
+---
+
+{
+  hasFile ? (
+    <img class:list={['logo', className]} src={spec.src} alt={alt} style={`height: ${height}px`} />
+  ) : (
+    <span class:list={['logo', 'logo--text', `logo--${variant}`, className]} style={`--logo-h: ${height}px`} aria-label={alt || undefined}>
+      {site.name}
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    display: block;
+    width: auto;
+  }
+
+  .logo--text {
+    font-size: calc(var(--logo-h) * 0.82);
+    line-height: 1;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.04em;
+  }
+
+  .logo--light {
+    color: var(--color-cream);
+  }
+
+  .logo--dark {
+    color: var(--color-primary);
+  }
+</style>
