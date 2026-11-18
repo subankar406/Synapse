@@ -1,53 +1,46 @@
 ---
-import { hasPublicFile } from '../../lib/assets';
-import { images } from '../../data/images';
-import { site } from '../../data/site';
+import logo from '../../assets/brand/logo.svg?raw';
+import mark from '../../assets/brand/mark.svg?raw';
 
 /**
- * Synapse logo. `light` = cream logo for dark backgrounds, `dark` = for
- * cream backgrounds. Falls back to a typeset wordmark until the logo file
- * is added to /public.
+ * Synapse brand artwork, inlined so it inherits colour from CSS.
+ *  - `kind="logo"`: full lockup (mark + "synapse" wordmark)
+ *  - `kind="mark"`: the four-circle symbol alone
+ * `variant` picks the brand colour; `height` sets the rendered size.
  */
 interface Props {
+  kind?: 'logo' | 'mark';
   variant?: 'light' | 'dark';
   height?: number;
   alt?: string;
   class?: string;
 }
 
-const { variant = 'light', height = 34, alt = '', class: className } = Astro.props;
-const spec = images[variant === 'light' ? 'logoLight' : 'logoDark'];
-const hasFile = hasPublicFile(spec.src);
+const { kind = 'logo', variant = 'light', height = 34, alt = '', class: className } = Astro.props;
+const svg = (kind === 'logo' ? logo : mark).replace(
+  '<svg ',
+  `<svg height="${height}" ${alt ? `role="img" aria-label="${alt}"` : 'aria-hidden="true"'} `,
+);
 ---
 
-{
-  hasFile ? (
-    <img class:list={['logo', className]} src={spec.src} alt={alt} style={`height: ${height}px`} />
-  ) : (
-    <span class:list={['logo', 'logo--text', `logo--${variant}`, className]} style={`--logo-h: ${height}px`} aria-label={alt || undefined}>
-      {site.name}
-    </span>
-  )
-}
+<span class:list={['brand', `brand--${variant}`, className]} set:html={svg} />
 
 <style>
-  .logo {
+  .brand {
+    display: block;
+    line-height: 0;
+  }
+
+  .brand :global(svg) {
     display: block;
     width: auto;
   }
 
-  .logo--text {
-    font-size: calc(var(--logo-h) * 0.82);
-    line-height: 1;
-    font-weight: var(--weight-bold);
-    letter-spacing: -0.04em;
-  }
-
-  .logo--light {
+  .brand--light {
     color: var(--color-cream);
   }
 
-  .logo--dark {
+  .brand--dark {
     color: var(--color-primary);
   }
 </style>

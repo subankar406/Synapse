@@ -1,7 +1,6 @@
 ---
 import { getDictionary, type Locale } from '../../i18n';
-import { images } from '../../data/images';
-import { hasPublicFile } from '../../lib/assets';
+import Logo from '../ui/Logo.astro';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import Button from '../ui/Button.astro';
@@ -13,15 +12,14 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = getDictionary(lang);
-const mark = images.markVision;
 ---
 
 <Section id="vision" labelledby="vis-title" tone="burgundy" pad="lg" width="narrow" innerClass="vision">
-  {hasPublicFile(mark.src) && <img slot="background" class="vision__mark" src={mark.src} alt="" aria-hidden="true" />}
+  <Logo slot="background" kind="mark" variant="light" height={610} class="vision__mark" />
 
   <Heading id="vis-title" size="vision" parts={t.vision.title} />
-  <p class="vision__lede">{t.vision.lede}</p>
-  <p class="vision__text"><strong>{t.vision.highlight}</strong></p>
+  <p class="vision__lede" data-scroll-reveal>{t.vision.lede}</p>
+  <p class="vision__text" data-scroll-reveal><strong>{t.vision.highlight}</strong></p>
 
   <button type="button" class="vision__toggle" aria-expanded="false" aria-controls="vision-more" data-vision-toggle>
     {t.vision.more}
@@ -29,8 +27,8 @@ const mark = images.markVision;
   </button>
 
   <div id="vision-more" class="vision__more" hidden>
-    {t.vision.details.map((p) => <p class="vision__text" set:html={p} />)}
-    <p class="vision__text vision__closing" set:html={t.vision.closing} />
+    {t.vision.details.map((p) => <p class="vision__text" set:html={p} data-scroll-reveal />)}
+    <p class="vision__text vision__closing" set:html={t.vision.closing} data-scroll-reveal />
     <button type="button" class="vision__toggle" aria-expanded="true" aria-controls="vision-more" data-vision-toggle>
       {t.vision.less}
       <Icon name="chevron-up" size={16} strokeWidth={2.2} />
@@ -53,6 +51,7 @@ const mark = images.markVision;
       more.hidden = open;
       more.setAttribute('aria-expanded', String(open));
       if (!open) more.focus();
+      document.dispatchEvent(new Event('layout:change'));
     });
   });
 </script>
@@ -64,10 +63,8 @@ const mark = images.markVision;
     gap: 30px;
   }
 
-  .vision__mark {
+  :global(.vision__mark) {
     position: absolute;
-    width: 620px;
-    height: auto;
     right: -160px;
     top: -140px;
     opacity: 0.08;

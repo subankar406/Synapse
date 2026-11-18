@@ -3,7 +3,7 @@ import { getDictionary, type Locale } from '../../i18n';
 import { site } from '../../data/site';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
-import NeighbourhoodMap from '../map/NeighbourhoodMap.astro';
+import MapEmbed from '../ui/MapEmbed.astro';
 
 interface Props {
   lang: Locale;
@@ -16,9 +16,9 @@ const t = getDictionary(lang);
 <Section id="infos" labelledby="info-title" tone="white">
   <Heading id="info-title" parts={t.practical.title} spacing={40} />
 
-  <NeighbourhoodMap lang={lang} />
+  <MapEmbed lang={lang} />
 
-  <div class="contact">
+  <div class="contact" data-stagger>
     <div class="contact__col contact__col--primary">
       <h3 class="contact__title">{t.practical.contactTitle}</h3>
       <span>{site.address.full}</span>

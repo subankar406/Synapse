@@ -15,22 +15,65 @@ const t = getDictionary(lang);
 <Section id="faq" labelledby="faq-title" innerClass="split">
   <Heading id="faq-title" parts={t.faq.title} />
 
-  <div class="faq">
+  <div class="faq" data-accordion data-stagger>
     {
       t.faq.items.map((item, i) => (
-        <details class="faq__item" open={i === 0}>
+        <details class:list={['faq__item', { 'is-open': i === 0 }]} open={i === 0} data-accordion-item>
           <summary class="faq__question">
             {item.q}
             <span class:list={['faq__icon', i % 2 === 0 ? 'tone-primary' : 'tone-secondary']} aria-hidden="true">
               <Icon name="plus" size={20} strokeWidth={2.2} />
             </span>
           </summary>
-          <p class="faq__answer">{item.a}</p>
+          <div class="faq__content" data-accordion-content>
+            <p class="faq__answer">{item.a}</p>
+          </div>
         </details>
       ))
     }
   </div>
 </Section>
+
+<script>
+  /**
+   * Smooth accordion on native <details>: animates height 0 ↔ auto with an
+   * ease-in-out curve and keeps only one item open at a time.
+   */
+  const DURATION = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400;
+  const EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
+
+  document.querySelectorAll<HTMLElement>('[data-accordion]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLDetailsElement>('[data-accordion-item]')];
+    const running = new WeakMap<HTMLDetailsElement, Animation>();
+
+    const animate = (item: HTMLDetailsElement, open: boolean) => {
+      const content = item.querySelector<HTMLElement>('[data-accordion-content]')!;
+      // Start from the current rendered height so a click mid-animation reverses smoothly.
+      const from = item.open ? content.getBoundingClientRect().height : 0;
+      running.get(item)?.cancel();
+      item.classList.toggle('is-open', open);
+      if (open) item.open = true;
+
+      const to = open ? content.scrollHeight : 0;
+      const anim = content.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: DURATION, easing: EASING });
+      running.set(item, anim);
+      anim.onfinish = () => {
+        running.delete(item);
+        if (!open) item.open = false;
+        document.dispatchEvent(new Event('layout:change'));
+      };
+    };
+
+    items.forEach((item) => {
+      item.querySelector('summary')!.addEventListener('click', (event) => {
+        event.preventDefault();
+        const opening = !item.classList.contains('is-open');
+        if (opening) items.filter((other) => other !== item && other.classList.contains('is-open')).forEach((other) => animate(other, false));
+        animate(item, opening);
+      });
+    });
+  });
+</script>
 
 <style>
   .faq {
@@ -65,8 +108,12 @@ const t = getDictionary(lang);
     transition: transform 0.3s var(--ease);
   }
 
-  .faq__item[open] .faq__icon {
+  .faq__item.is-open .faq__icon {
     transform: rotate(45deg);
+  }
+
+  .faq__content {
+    overflow: hidden;
   }
 
   .faq__answer {

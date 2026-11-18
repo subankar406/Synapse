@@ -3,7 +3,8 @@
  *  - [data-modal-open="id"] opens #modal-id
  *  - [data-modal-close] closes its dialog
  *  - clicking the backdrop closes the dialog
- * Emits `modal:open` on document so other widgets (e.g. the mobile menu) can react.
+ * Emits `modal:open` (detail: the dialog) so other widgets can react — the mobile
+ * menu closes, and scripts/animations.ts replays the entrance animation.
  */
 document.addEventListener('click', (event) => {
   const target = event.target as HTMLElement;
@@ -12,8 +13,9 @@ document.addEventListener('click', (event) => {
   if (opener?.dataset.modalOpen) {
     const dialog = document.getElementById(`modal-${opener.dataset.modalOpen}`);
     if (dialog instanceof HTMLDialogElement) {
-      document.dispatchEvent(new CustomEvent('modal:open', { detail: opener.dataset.modalOpen }));
+      dialog.querySelector('[data-modal-scroll]')?.scrollTo(0, 0);
       dialog.showModal();
+      document.dispatchEvent(new CustomEvent('modal:open', { detail: dialog }));
     }
     return;
   }

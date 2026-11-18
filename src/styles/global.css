@@ -91,26 +91,25 @@ button:focus-visible,
   padding: 0;
 }
 
-/* Scroll-driven entrance, only where supported and motion is allowed */
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
+/*
+ * Entrance animations (scripts/animations.ts). While JS sets initial states,
+ * page content stays hidden to avoid a flash; a CSS fallback reveals it if JS fails.
+ */
+@keyframes anim-fallback {
   to {
-    opacity: 1;
-    transform: none;
+    visibility: visible;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .reveal {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 45%;
-    }
-  }
+html.anim:not(.anim-ready) main,
+html.anim:not(.anim-ready) footer {
+  visibility: hidden;
+  animation: anim-fallback 0s 2.5s forwards;
+}
+
+/* SplitText wrappers keep words together while letters animate. */
+.split-word {
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {

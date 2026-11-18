@@ -16,16 +16,16 @@ const t = getDictionary(lang);
 ---
 
 <section id="top" class="hero" aria-labelledby="hero-title">
-  <div class="hero__inner container">
+  <div class="hero__inner container" data-anim-scope>
     <Heading as="h1" id="hero-title" size="display" parts={t.hero.title} />
     <p class="hero__tagline">{t.hero.tagline}</p>
 
-    <div class="hero__actions">
+    <div class="hero__actions" data-stagger>
       <Button modal="rdv">{t.common.book}</Button>
       <Button variant="secondary" href="#equipe">{t.hero.meetTeam}</Button>
     </div>
 
-    <ul class="hero__facts reset-list">
+    <ul class="hero__facts reset-list" data-stagger>
       <InfoItem icon="pin">{site.address.full}</InfoItem>
       <InfoItem icon="metro" tone="secondary">
         <span>

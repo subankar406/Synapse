@@ -13,7 +13,7 @@ export const en = {
 
   common: {
     book: 'Book an appointment',
-    bookArrow: 'Book an appointment →',
+    bookLong: 'Book an appointment',
     seeMore: 'See more',
     close: 'Close',
     officialSite: 'official website',
@@ -155,21 +155,8 @@ export const en = {
   },
 
   map: {
-    label:
-      'Map of the neighbourhood around the clinic, 24 boulevard de Magenta: République and Jacques Bonsergent metro stations, bakeries, gyms and radiology centre',
-    zoomIn: 'Zoom in',
-    zoomOut: 'Zoom out',
-    recenter: 'Recenter on the clinic',
+    title: 'Map: 24 boulevard de Magenta, 75010 Paris',
     openInMaps: 'Open in Google Maps',
-    clinicPin: 'Synapse, 24 boulevard de Magenta',
-    shortAddress: '24 bd de Magenta · 75010',
-    legend: {
-      metro: 'Metro',
-      cafe: 'Cafés & bakeries',
-      restaurant: 'Restaurants',
-      sport: 'Sport & wellness',
-      health: 'Health',
-    },
   },
 
   faq: {

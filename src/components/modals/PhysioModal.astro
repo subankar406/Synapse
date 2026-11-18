@@ -28,7 +28,7 @@ const titleId = `${physio.id}-title`;
   />
 
   <div>
-    <h2 id={titleId} class="profile__name">{physio.name}</h2>
+    <h2 id={titleId} class="profile__name" data-split>{physio.name}</h2>
     <p class="profile__role">{copy.title}{t.physio.rppsSuffix}</p>
   </div>
 
@@ -47,21 +47,19 @@ const titleId = `${physio.id}-title`;
 
 <style>
   :global(.profile__portrait) {
-    position: absolute;
-    inset: 0;
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center bottom;
-    background: var(--color-white);
-  }
-
-  :global(.profile__portrait.media--placeholder) {
-    background: var(--placeholder);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: var(--radius-lg);
+    background: var(--placeholder, var(--color-white));
   }
 
   .profile__name {
     margin: 0;
+    /* Leave room for the close button beside the name. */
+    padding-right: 48px;
     font-size: var(--fs-modal-title);
     letter-spacing: var(--tracking-title);
   }

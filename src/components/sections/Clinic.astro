@@ -24,16 +24,16 @@ const right = t.clinic.featuresRight;
 <Section id="cabinet" labelledby="cab-title" tone="white">
   <Heading id="cab-title" size="wide" parts={t.clinic.title} spacing={44} />
 
-  <div class="gallery">
+  <div class="gallery" data-stagger>
     {
       gallery.map((tile) => (
-        <Media image={tile.image} alt={t.clinic.gallery[tile.key]} class:list={['gallery__tile', 'reveal', tile.area && `gallery__tile--${tile.area}`]} />
+        <Media image={tile.image} alt={t.clinic.gallery[tile.key]} class:list={['gallery__tile', tile.area && `gallery__tile--${tile.area}`]} />
       ))
     }
   </div>
 
   <div class="features">
-    <ul class="reset-list">
+    <ul class="reset-list" data-stagger>
       {
         left.map((text, i) => (
           <li>
@@ -43,7 +43,7 @@ const right = t.clinic.featuresRight;
         ))
       }
     </ul>
-    <ul class="reset-list">
+    <ul class="reset-list" data-stagger>
       {
         right.map((text, i) => (
           <li>
@@ -55,7 +55,7 @@ const right = t.clinic.featuresRight;
     </ul>
   </div>
 
-  <ul class="facts reset-list">
+  <ul class="facts reset-list" data-stagger>
     <InfoItem icon="pin" label={t.info.addressLabel}>{site.address.full}</InfoItem>
     <InfoItem icon="metro" tone="secondary" label={t.info.metroLabel}>
       {

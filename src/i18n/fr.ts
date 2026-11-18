@@ -9,7 +9,7 @@ export const fr: Dictionary = {
 
   common: {
     book: 'Prendre RDV',
-    bookArrow: 'Prendre rendez-vous →',
+    bookLong: 'Prendre rendez-vous',
     seeMore: 'Voir plus',
     close: 'Fermer',
     officialSite: 'site officiel',
@@ -151,21 +151,8 @@ export const fr: Dictionary = {
   },
 
   map: {
-    label:
-      'Plan du quartier autour du cabinet, 24 boulevard de Magenta : métros République et Jacques Bonsergent, boulangeries, salles de sport et centre de radiologie',
-    zoomIn: 'Zoomer',
-    zoomOut: 'Dézoomer',
-    recenter: 'Recentrer sur le cabinet',
+    title: 'Plan : 24 boulevard de Magenta, 75010 Paris',
     openInMaps: 'Ouvrir dans Google Maps',
-    clinicPin: 'Synapse, 24 boulevard de Magenta',
-    shortAddress: '24 bd de Magenta · 75010',
-    legend: {
-      metro: 'Métro',
-      cafe: 'Cafés & boulangeries',
-      restaurant: 'Restaurants',
-      sport: 'Sport & bien-être',
-      health: 'Santé',
-    },
   },
 
   faq: {

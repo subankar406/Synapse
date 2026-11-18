@@ -13,15 +13,17 @@ interface Props {
   as?: Level;
   size?: Size;
   id?: string;
+  /** Letter-stagger entrance animation (scripts/animations.ts). Default on. */
+  split?: boolean;
   /** Space below the heading, in px (sections use 40–44). */
   spacing?: number;
   class?: string;
 }
 
-const { parts, as: Tag = 'h2', size = 'section', id, spacing = 0, class: className } = Astro.props;
+const { parts, as: Tag = 'h2', size = 'section', id, split = true, spacing = 0, class: className } = Astro.props;
 ---
 
-<Tag id={id} class:list={['heading', `heading--${size}`, className]} style={spacing ? `--heading-spacing: ${spacing}px` : undefined}>
+<Tag id={id} class:list={['heading', `heading--${size}`, className]} style={spacing ? `--heading-spacing: ${spacing}px` : undefined} data-split={split ? '' : undefined}>
   {parts.map((part) => (typeof part === 'string' ? part : <span class={`tone-${part.tone}`}>{part.text}</span>))}
 </Tag>
 

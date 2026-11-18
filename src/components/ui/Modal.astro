@@ -3,15 +3,18 @@ import Icon from './Icon.astro';
 
 /**
  * Accessible modal built on native <dialog>. Open it from anywhere with
- * `data-modal-open="<id>"` (see Button `modal` prop); the shared script in
- * scripts/modals.ts handles opening, closing and backdrop clicks.
+ * `data-modal-open="<id>"` (see Button `modal` prop); scripts/modals.ts
+ * handles opening, closing and backdrop clicks.
+ *
+ * Content scrolls inside `.modal__scroll` (scrollbar hidden) so the close
+ * button stays put. In `split` mode the media column is sticky and lines up
+ * with the top of the content.
  */
 interface Props {
   id: string;
   labelledby: string;
   closeLabel: string;
   size?: 'sm' | 'lg';
-  /** Split layout: media on one side (slot "media"), content on the other. */
   split?: boolean;
 }
 
@@ -19,25 +22,34 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
 ---
 
 <dialog id={`modal-${id}`} class:list={['modal', `modal--${size}`, { 'modal--split': split }]} aria-labelledby={labelledby}>
-  {split && <div class="modal__media"><slot name="media" /></div>}
-  <div class="modal__body">
-    <button type="button" class="modal__close" data-modal-close aria-label={closeLabel}>
-      <Icon name="close" size={18} strokeWidth={2.2} />
-    </button>
-    <slot />
+  <button type="button" class="modal__close" data-modal-close aria-label={closeLabel}>
+    <Icon name="close" size={18} strokeWidth={2.2} />
+  </button>
+  <div class="modal__scroll" data-modal-scroll>
+    {
+      split && (
+        <div class="modal__media">
+          <slot name="media" />
+        </div>
+      )
+    }
+    <div class="modal__body">
+      <slot />
+    </div>
   </div>
 </dialog>
 
 <style>
   .modal {
+    --modal-pad: clamp(24px, 4vw, 44px);
+    position: fixed;
     width: calc(100% - 32px);
-    max-height: calc(100vh - 32px);
     padding: 0;
     border: 0;
     border-radius: var(--radius-xl);
     background: var(--color-cream);
     color: var(--color-text);
-    overflow: auto;
+    overflow: hidden;
   }
 
   .modal::backdrop {
@@ -52,15 +64,31 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
     max-width: 920px;
   }
 
-  .modal[open].modal--split {
+  .modal__scroll {
+    max-height: var(--modal-max-h, 75vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .modal__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .modal--sm .modal__scroll {
+    --modal-max-h: calc(100vh - 32px);
+  }
+
+  .modal--split .modal__scroll {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .modal__media {
-    position: relative;
-    min-height: 320px;
-    overflow: hidden;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: var(--modal-pad) 0 var(--modal-pad) var(--modal-pad);
   }
 
   .modal__body {
@@ -72,14 +100,15 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
 
   .modal--split .modal__body {
     gap: 20px;
-    padding: clamp(24px, 4vw, 44px);
+    /* Extra right padding keeps scrolled text clear of the close button. */
+    padding: var(--modal-pad) calc(var(--modal-pad) + 28px) var(--modal-pad) var(--modal-pad);
   }
 
   .modal__close {
     position: absolute;
     right: 14px;
     top: 14px;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -90,5 +119,18 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
     background: var(--color-cream);
     color: var(--color-text);
     cursor: pointer;
+  }
+
+  /* Stacked layout on narrow screens: photo scrolls with the text. */
+  @media (max-width: 719px) {
+    .modal--split .modal__scroll {
+      --modal-max-h: 85vh;
+      grid-template-columns: 1fr;
+    }
+
+    .modal__media {
+      position: static;
+      padding: var(--modal-pad) var(--modal-pad) 0;
+    }
   }
 </style>

@@ -23,11 +23,16 @@ const t = getDictionary(lang);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&display=swap" rel="stylesheet" />
+    <script is:inline>
+      // Flag animation-capable visits early so content doesn't flash before GSAP sets initial states.
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('anim');
+    </script>
   </head>
   <body>
     <slot />
     <script>
       import '../scripts/modals';
+      import '../scripts/animations';
     </script>
   </body>
 </html>

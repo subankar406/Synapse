@@ -17,10 +17,10 @@ const t = getDictionary(lang);
 <Section id="equipe" labelledby="eq-title" tone="cream">
   <Heading id="eq-title" parts={t.team.title} spacing={44} />
 
-  <div class="team">
+  <div class="team" data-stagger>
     {
       team.map((p) => (
-        <article class="member reveal">
+        <article class="member">
           <div class={`member__portrait member__portrait--${p.id}`}>
             <Media
               image={p.image}

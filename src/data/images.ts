@@ -1,5 +1,5 @@
 /**
- * Every image on the site, by key. Drop the file at `public<src>` and it
+ * Every photo on the site, by key (brand artwork lives in src/assets/brand). Drop the file at `public<src>` and it
  * appears automatically; until then a tinted placeholder of `placeholder`
  * colour is rendered in its place (see components/ui/Media.astro).
  */
@@ -10,12 +10,6 @@ export interface ImageSpec {
 }
 
 export const images = {
-  // Brand
-  logoLight: { src: '/images/brand/logo-light.svg', placeholder: 'transparent' },
-  logoDark: { src: '/images/brand/logo-dark.svg', placeholder: 'transparent' },
-  markVision: { src: '/images/brand/mark-vision.svg', placeholder: 'transparent' },
-  markCta: { src: '/images/brand/mark-cta.svg', placeholder: 'transparent' },
-
   // Hero & clinic
   hero: { src: '/images/clinic/hero.jpg', placeholder: 'var(--color-mint)' },
   reception: { src: '/images/clinic/reception.jpg', placeholder: 'var(--color-blush)' },
@@ -24,8 +18,8 @@ export const images = {
   training: { src: '/images/clinic/training.jpg', placeholder: 'var(--color-mint)' },
 
   // Team
-  lena: { src: '/images/team/lena-may.png', placeholder: 'var(--color-white)' },
-  louis: { src: '/images/team/louis-neyret.png', placeholder: 'var(--color-mint)' },
+  lena: { src: '/images/team/lena-may.jpg', placeholder: 'var(--color-white)' },
+  louis: { src: '/images/team/louis-neyret.jpg', placeholder: 'var(--color-mint)' },
 
   // Expertises
   expMusculo: { src: '/images/expertises/musculoskeletal.jpg', placeholder: 'var(--color-mint)' },

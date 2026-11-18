@@ -22,7 +22,7 @@ const { id, labelledby, tone = 'cream', pad = 'default', width = 'default', clas
 
 <section id={id} aria-labelledby={labelledby} class:list={['section', `section--${tone}`, className]}>
   <slot name="background" />
-  <div class:list={['section__inner', `section__inner--${width}`, `section__inner--pad-${pad}`, innerClass]}>
+  <div class:list={['section__inner', `section__inner--${width}`, `section__inner--pad-${pad}`, innerClass]} data-anim-scope>
     <slot />
   </div>
 </section>

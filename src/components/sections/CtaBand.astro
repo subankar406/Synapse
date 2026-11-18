@@ -1,7 +1,6 @@
 ---
 import { getDictionary, type Locale } from '../../i18n';
-import { images } from '../../data/images';
-import { hasPublicFile } from '../../lib/assets';
+import Logo from '../ui/Logo.astro';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import Button from '../ui/Button.astro';
@@ -12,11 +11,10 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = getDictionary(lang);
-const mark = images.markCta;
 ---
 
 <Section labelledby="cta-title" tone="blush" pad="xl" innerClass="cta">
-  {hasPublicFile(mark.src) && <img slot="background" class="cta__mark" src={mark.src} alt="" aria-hidden="true" />}
+  <Logo slot="background" kind="mark" variant="dark" height={295} class="cta__mark" />
   <Heading id="cta-title" size="cta" parts={t.cta.title} />
   <Button modal="rdv" class="cta__btn">{t.common.book}</Button>
 </Section>
@@ -30,12 +28,10 @@ const mark = images.markCta;
     text-align: center;
   }
 
-  .cta__mark {
+  :global(.cta__mark) {
     position: absolute;
     right: 6%;
     top: 50%;
-    width: 300px;
-    height: auto;
     transform: translateY(-50%);
     opacity: 0.14;
     pointer-events: none;
