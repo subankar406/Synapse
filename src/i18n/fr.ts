@@ -71,6 +71,13 @@ export const fr: Dictionary = {
     ],
   },
 
+  lightbox: {
+    label: 'Visionneuse d’images',
+    open: 'Agrandir',
+    prev: 'Image précédente',
+    next: 'Image suivante',
+  },
+
   team: {
     title: ['Rencontrez ', { text: 'vos kinés.', tone: 'primary' }],
     role: 'Masseur-kinésithérapeute D.E.',

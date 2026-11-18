@@ -2,11 +2,12 @@
 import { getDictionary, type Locale } from '../../i18n';
 import { site } from '../../data/site';
 import { gallery } from '../../data/content';
+import { images } from '../../data/images';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import Media from '../ui/Media.astro';
 import InfoItem from '../ui/InfoItem.astro';
-import MetroLines from '../ui/MetroLines.astro';
+import StationList from '../ui/StationList.astro';
 
 interface Props {
   lang: Locale;
@@ -27,7 +28,16 @@ const right = t.clinic.featuresRight;
   <div class="gallery" data-stagger>
     {
       gallery.map((tile) => (
-        <Media image={tile.image} alt={t.clinic.gallery[tile.key]} class:list={['gallery__tile', tile.area && `gallery__tile--${tile.area}`]} />
+        <button
+          type="button"
+          class:list={['gallery__tile', tile.area && `gallery__tile--${tile.area}`]}
+          data-lightbox="clinic"
+          data-lightbox-src={images[tile.image].src}
+          data-lightbox-alt={t.clinic.gallery[tile.key]}
+          aria-label={`${t.lightbox.open}: ${t.clinic.gallery[tile.key]}`}
+        >
+          <Media image={tile.image} alt="" class="gallery__img" />
+        </button>
       ))
     }
   </div>
@@ -58,14 +68,7 @@ const right = t.clinic.featuresRight;
   <ul class="facts reset-list" data-stagger>
     <InfoItem icon="pin" label={t.info.addressLabel}>{site.address.full}</InfoItem>
     <InfoItem icon="metro" tone="secondary" label={t.info.metroLabel}>
-      {
-        site.stations.map((s, i) => (
-          <>
-            {i > 0 && ' · '}
-            {s.name} <MetroLines lines={s.lines} />
-          </>
-        ))
-      }
+      <StationList />
     </InfoItem>
     <InfoItem icon="clock" label={t.info.hoursLabel}>{t.info.hoursShort}</InfoItem>
   </ul>
@@ -79,18 +82,36 @@ const right = t.clinic.featuresRight;
     gap: 16px;
   }
 
-  .gallery :global(.gallery__tile) {
+  /* Each tile clips its image, which zooms on hover; click opens the lightbox. */
+  .gallery__tile {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+  }
+
+  .gallery__tile :global(.gallery__img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: var(--radius-lg);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .gallery :global(.gallery__tile--tall) {
+  .gallery__tile:hover :global(.gallery__img),
+  .gallery__tile:focus-visible :global(.gallery__img) {
+    transform: scale(1.06);
+  }
+
+  .gallery__tile--tall {
     grid-row: 1 / 3;
   }
 
-  .gallery :global(.gallery__tile--wide) {
+  .gallery__tile--wide {
     grid-column: 2 / 4;
   }
 
@@ -145,12 +166,12 @@ const right = t.clinic.featuresRight;
       grid-template-rows: 240px 180px 180px;
     }
 
-    .gallery :global(.gallery__tile--tall) {
+    .gallery__tile--tall {
       grid-column: 1 / 3;
       grid-row: auto;
     }
 
-    .gallery :global(.gallery__tile--wide) {
+    .gallery__tile--wide {
       grid-column: auto;
     }
 
@@ -160,8 +181,15 @@ const right = t.clinic.featuresRight;
   }
 
   @media (max-width: 767px) {
+    /* Mobile: one image per row. */
     .gallery {
-      grid-template-rows: 220px 150px 150px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery__tile {
+      aspect-ratio: 4 / 3;
+      height: auto;
     }
 
     .features {

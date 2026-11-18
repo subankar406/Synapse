@@ -121,6 +121,15 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
     cursor: pointer;
   }
 
+  .modal__close :global(svg) {
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .modal__close:hover :global(svg),
+  .modal__close:focus-visible :global(svg) {
+    transform: rotate(360deg);
+  }
+
   /* Stacked layout on narrow screens: photo scrolls with the text. */
   @media (max-width: 719px) {
     .modal--split .modal__scroll {

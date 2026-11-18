@@ -98,6 +98,8 @@
   --section-pad-lg: clamp(72px, 10vw, 128px);
   --section-pad-xl: clamp(80px, 11vw, 136px);
   --header-offset: 84px;
+  /* Height of the header bar (menu button 48px + 16px padding top and bottom). */
+  --header-h: 80px;
 
   /* ---------- Shape ---------- */
   --radius-pill: 999px;

@@ -100,29 +100,49 @@ const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noop
     --btn-fg-hover: var(--color-primary);
   }
 
-  .btn--xs {
-    padding: 10px 18px;
-    font-size: var(--fs-xs);
+  /* Sizes set padding/font variables at zero specificity, so a component can
+     override --btn-py / --btn-px with a single class. Mobile scales the padding. */
+  :where(.btn--xs) {
+    --btn-py: 10px;
+    --btn-px: 18px;
+    --btn-fs: var(--fs-xs);
   }
 
-  .btn--sm {
-    padding: 14px 22px;
-    font-size: var(--fs-sm);
+  :where(.btn--sm) {
+    --btn-py: 14px;
+    --btn-px: 22px;
+    --btn-fs: var(--fs-sm);
   }
 
-  .btn--md {
-    padding: 14px 26px;
-    font-size: var(--fs-base);
+  :where(.btn--md) {
+    --btn-py: 14px;
+    --btn-px: 26px;
+    --btn-fs: var(--fs-base);
   }
 
-  .btn--lg {
-    padding: 18px 32px;
-    font-size: var(--fs-md);
+  :where(.btn--lg) {
+    --btn-py: 18px;
+    --btn-px: 32px;
+    --btn-fs: var(--fs-md);
   }
 
-  .btn--xl {
-    padding: 20px 24px;
-    font-size: var(--fs-base);
+  :where(.btn--xl) {
+    --btn-py: 20px;
+    --btn-px: 24px;
+    --btn-fs: var(--fs-base);
+  }
+
+  .btn {
+    padding: calc(var(--btn-py) * var(--btn-scale, 1)) calc(var(--btn-px) * var(--btn-scale, 1));
+    font-size: var(--btn-fs);
+  }
+
+  /* Mobile: buttons at 60% of their desktop padding, labels at 14px. */
+  @media (max-width: 767px) {
+    .btn {
+      --btn-scale: 0.6;
+      font-size: var(--fs-xs);
+    }
   }
 
   .btn--block {

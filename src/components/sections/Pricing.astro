@@ -71,8 +71,24 @@ const t = getDictionary(lang);
   }
 
   @media (max-width: 767px) {
+    .prices__table {
+      font-size: var(--fs-sm);
+    }
+
+    .prices__table th,
+    .prices__table td {
+      padding-block: 16px;
+    }
+
+    /* Breathing room between duration and price on narrow screens. */
+    .prices__table .prices__duration {
+      padding-inline: 12px;
+      white-space: nowrap;
+    }
+
     .prices__table .prices__amount {
-      font-size: var(--fs-xl);
+      font-size: var(--fs-md);
+      white-space: nowrap;
     }
   }
 </style>

@@ -4,7 +4,7 @@ import { site } from '../../data/site';
 import Heading from '../ui/Heading.astro';
 import Button from '../ui/Button.astro';
 import InfoItem from '../ui/InfoItem.astro';
-import MetroLines from '../ui/MetroLines.astro';
+import StationList from '../ui/StationList.astro';
 import Media from '../ui/Media.astro';
 
 interface Props {
@@ -28,16 +28,7 @@ const t = getDictionary(lang);
     <ul class="hero__facts reset-list" data-stagger>
       <InfoItem icon="pin">{site.address.full}</InfoItem>
       <InfoItem icon="metro" tone="secondary">
-        <span>
-          {
-            site.stations.map((s, i) => (
-              <>
-                {i > 0 && ' · '}
-                {s.name} <MetroLines lines={s.lines} />
-              </>
-            ))
-          }
-        </span>
+        <StationList />
       </InfoItem>
       <InfoItem icon="clock">{t.info.sessions}</InfoItem>
     </ul>

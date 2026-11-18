@@ -116,4 +116,9 @@ html.anim:not(.anim-ready) footer {
   .hide-mobile {
     display: none !important;
   }
+
+  /* Mobile body copy: every paragraph at 1rem, overriding component sizes. */
+  p {
+    font-size: 1rem !important;
+  }
 }

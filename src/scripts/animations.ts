@@ -6,7 +6,7 @@
  *  - [data-stagger]  container whose direct children fade up one after another
  *  - [data-fade]     single element that fades up
  *  - [data-scroll-reveal]  paragraph whose words brighten from dim to full as you scroll;
- *                          sibling paragraphs reveal one after another
+ *                          paragraphs in a section reveal one after another
  *  - [data-no-anim]  opt an element out of the automatic fade
  *  Anything else that is a direct child of a section's inner container
  *  ([data-anim-scope]) fades up automatically.
@@ -60,36 +60,49 @@ function onView(trigger: Element, build: Build) {
 }
 
 /**
- * Words go from dim to full opacity, scrubbed by scroll. Sibling paragraphs
- * form one sequence: the next paragraph starts only once the previous one is
- * fully revealed. The sequence runs from the first paragraph reaching the
- * start line until the last one is at 45% of the viewport.
+ * Words go from dim to full opacity, scrubbed by scroll. All visible
+ * [data-scroll-reveal] paragraphs in a section form one sequence: each
+ * paragraph starts only once the previous one is fully revealed. The
+ * sequence is rebuilt on `layout:change` (e.g. "Learn more" toggled), so it
+ * always covers exactly the paragraphs currently on the page.
  */
-function scrollReveal(group: Element[]) {
+const revealWords = new WeakMap<Element, Element[]>();
+const revealTimelines = new Map<Element, gsap.core.Timeline>();
+
+function wordsOf(el: Element): Element[] {
+  let words = revealWords.get(el);
+  if (!words) {
+    words = SplitText.create(el, { type: 'words', wordsClass: 'split-word' }).words;
+    revealWords.set(el, words);
+  }
+  return words;
+}
+
+function buildScrollReveal(section: Element) {
+  revealTimelines.get(section)?.scrollTrigger?.kill();
+  revealTimelines.get(section)?.kill();
+
+  const paragraphs = [...section.querySelectorAll<HTMLElement>('[data-scroll-reveal]')].filter((p) => p.offsetParent !== null);
+  if (!paragraphs.length) return;
+
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: group[0],
+      trigger: paragraphs[0],
       start: START,
-      endTrigger: group[group.length - 1],
+      endTrigger: paragraphs[paragraphs.length - 1],
       end: 'bottom 45%',
       scrub: 0.6,
     },
   });
-  group.forEach((el) => {
-    const words = SplitText.create(el, { type: 'words', wordsClass: 'split-word' }).words;
-    // Duration proportional to length, so long paragraphs take more scroll.
-    tl.fromTo(words, { opacity: 0.2 }, { opacity: 1, ease: 'none', duration: 0.1, stagger: 0.1 });
-  });
+  // Each word gets an equal slice of scroll, so longer paragraphs take longer.
+  paragraphs.forEach((p) => tl.fromTo(wordsOf(p), { opacity: 0.2 }, { opacity: 1, ease: 'none', duration: 0.1, stagger: 0.1 }));
+  revealTimelines.set(section, tl);
 }
 
-/** Group [data-scroll-reveal] paragraphs by parent, so siblings reveal in sequence. */
-function scrollRevealGroups(): Element[][] {
-  const groups = new Map<Element, Element[]>();
-  document.querySelectorAll('main [data-scroll-reveal]').forEach((el) => {
-    const parent = el.parentElement!;
-    groups.set(parent, [...(groups.get(parent) ?? []), el]);
-  });
-  return [...groups.values()];
+function initScrollReveal() {
+  const sections = new Set([...document.querySelectorAll('main [data-scroll-reveal]')].map((p) => p.closest('section') ?? p.parentElement!));
+  sections.forEach(buildScrollReveal);
+  document.addEventListener('layout:change', () => sections.forEach(buildScrollReveal));
 }
 
 const splits = new WeakMap<Element, SplitText>();
@@ -123,7 +136,7 @@ function autoFadeTargets(scope: Element): Element[] {
 
 function initPage() {
   document.querySelectorAll('main [data-split], footer [data-split]').forEach((el) => onView(el, () => letters(el)));
-  scrollRevealGroups().forEach(scrollReveal);
+  initScrollReveal();
 
   document.querySelectorAll('main [data-stagger], footer [data-stagger]').forEach((el) => {
     const children = [...el.children];

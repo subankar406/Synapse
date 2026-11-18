@@ -75,6 +75,13 @@ export const en = {
     ],
   },
 
+  lightbox: {
+    label: 'Image viewer',
+    open: 'View larger',
+    prev: 'Previous image',
+    next: 'Next image',
+  },
+
   team: {
     title: ['Meet ', { text: 'your physios.', tone: 'primary' }] as TitleParts,
     role: 'State-registered physiotherapist (France)',

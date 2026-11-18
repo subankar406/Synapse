@@ -66,6 +66,13 @@ const { parts, as: Tag = 'h2', size = 'section', id, split = true, spacing = 0, 
   }
 
   @media (max-width: 767px) {
+    /* h1 must stay larger than every h2 (largest mobile h2 is the CTA at ~38px). */
+    .heading--display {
+      font-size: 2.5rem;
+      white-space: normal;
+      text-wrap: balance;
+    }
+
     .heading--wide {
       white-space: normal;
       font-size: 30px;
