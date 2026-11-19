@@ -12,7 +12,7 @@
  *  ([data-anim-scope]) fades up automatically.
  *
  * Each animation plays when its element reaches 20% from the bottom of the
- * viewport. It only resets once its whole section has left the viewport
+ * viewport (hero elements play on load). It only resets once its whole section has left the viewport
  * through the bottom (scrolling back up), reversing smoothly rather than
  * snapping, so it replays the next time the section scrolls into view from
  * below. Modals replay on every open.
@@ -45,6 +45,14 @@ type Build = () => gsap.core.Tween | gsap.core.Timeline;
  */
 function onView(trigger: Element, build: Build) {
   const anim = build().pause(0);
+
+  // The hero is the first screen: everything in it plays on load, even parts
+  // (like the photo on phones) that start below the trigger line.
+  if (trigger.closest('#top')) {
+    anim.play();
+    return;
+  }
+
   const section = trigger.closest('section, footer') ?? trigger;
 
   ScrollTrigger.create({

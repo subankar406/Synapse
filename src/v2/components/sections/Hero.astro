@@ -100,8 +100,32 @@ const t = getDictionary(lang);
   }
 
   @media (max-width: 767px) {
+    /* Each info row reads as one centred line of text: icon inline at the start,
+       wrapped text centred beneath it. */
     .hero__facts {
-      font-size: 1rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .hero__facts :global(.info-item) {
+      display: block;
+    }
+
+    .hero__facts :global(.info-item__icon) {
+      display: inline-flex;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    .hero__facts :global(.stations) {
+      vertical-align: middle;
+      text-align: left;
+    }
+
+    .hero__facts {
+      font-size: 0.875rem;
     }
 
     .hero :global(.hero__photo) {
