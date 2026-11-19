@@ -4,7 +4,7 @@ import { expertiseImages } from '../../data/content';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import Media from '../ui/Media.astro';
-import IconSwap from '../ui/IconSwap.astro';
+import Icon from '../ui/Icon.astro';
 
 interface Props {
   lang: Locale;
@@ -34,10 +34,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
       }
     </div>
     <button class="carousel__arrow carousel__arrow--prev" type="button" aria-label={t.expertises.prev} data-prev hidden>
-      <IconSwap name="arrow-left" size={24} strokeWidth={2.2} direction="left" clip="parent" />
+      <Icon name="arrow-left" size={24} strokeWidth={2.2} />
     </button>
     <button class="carousel__arrow carousel__arrow--next" type="button" aria-label={t.expertises.next} data-next>
-      <IconSwap name="arrow-right" size={24} strokeWidth={2.2} direction="right" clip="parent" />
+      <Icon name="arrow-right" size={24} strokeWidth={2.2} />
     </button>
   </div>
 
@@ -192,8 +192,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
     justify-content: center;
     border: 0;
     border-radius: var(--radius-pill);
-    /* Clips the arrow as it slides out (IconSwap). */
-    overflow: hidden;
     cursor: pointer;
     /* Both arrows: cream with a forest icon, burgundy on hover. */
     background: var(--color-cream);
@@ -267,11 +265,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
       right: 10px;
       width: 40px;
       height: 40px;
-    }
-
-    .carousel__arrow :global(.icon-swap) {
-      width: 18px;
-      height: 18px;
     }
 
     .carousel__arrow :global(svg) {

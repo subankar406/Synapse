@@ -28,7 +28,7 @@ const { lang } = Astro.props;
 const t = getDictionary(lang);
 ---
 
-<BaseLayout lang={lang}>
+<BaseLayout lang={lang} entranceAnimations={false}>
   <Header lang={lang} />
   <main>
     <Hero lang={lang} />

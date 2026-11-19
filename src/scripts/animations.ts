@@ -175,8 +175,12 @@ function animateModal(dialog: HTMLDialogElement) {
   dialog.querySelectorAll('[data-split]').forEach((el) => tl.add(letters(el), 0.1));
 }
 
+// Pages can opt out (BaseLayout `entranceAnimations={false}` → <html data-entrance="off">).
+const entranceEnabled = root.dataset.entrance !== 'off';
+
 const motion = gsap.matchMedia();
 motion.add('(prefers-reduced-motion: no-preference)', () => {
+  if (!entranceEnabled) return;
   initPage();
   document.addEventListener('modal:open', (e) => animateModal((e as CustomEvent<HTMLDialogElement>).detail));
 });
