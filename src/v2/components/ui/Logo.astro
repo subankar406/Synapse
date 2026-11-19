@@ -1,0 +1,46 @@
+---
+import logo from '../../../assets/brand/logo.svg?raw';
+import mark from '../../../assets/brand/mark.svg?raw';
+
+/**
+ * Synapse brand artwork, inlined so it inherits colour from CSS.
+ *  - `kind="logo"`: full lockup (mark + "synapse" wordmark)
+ *  - `kind="mark"`: the four-circle symbol alone
+ * `variant` picks the brand colour; `height` sets the rendered size.
+ */
+interface Props {
+  kind?: 'logo' | 'mark';
+  variant?: 'light' | 'dark';
+  height?: number;
+  alt?: string;
+  class?: string;
+}
+
+const { kind = 'logo', variant = 'light', height = 34, alt = '', class: className } = Astro.props;
+const svg = (kind === 'logo' ? logo : mark).replace(
+  '<svg ',
+  `<svg height="${height}" ${alt ? `role="img" aria-label="${alt}"` : 'aria-hidden="true"'} `,
+);
+---
+
+<span class:list={['brand', `brand--${variant}`, className]} set:html={svg} />
+
+<style>
+  .brand {
+    display: block;
+    line-height: 0;
+  }
+
+  .brand :global(svg) {
+    display: block;
+    width: auto;
+  }
+
+  .brand--light {
+    color: var(--color-cream);
+  }
+
+  .brand--dark {
+    color: var(--color-primary);
+  }
+</style>

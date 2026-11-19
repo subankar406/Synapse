@@ -1,0 +1,52 @@
+---
+import { site } from '../../../data/site';
+import MetroLines from './MetroLines.astro';
+
+/**
+ * Nearby metro stations with their line badges. Each station (name + badges)
+ * is an unbreakable unit; units wrap as a whole, separated by a dot.
+ */
+---
+
+<span class="stations">
+  {
+    site.stations.map((s) => (
+      <span class="station">
+        {s.name}
+        <span class="station__lines">
+          <MetroLines lines={s.lines} />
+        </span>
+      </span>
+    ))
+  }
+</span>
+
+<style>
+  .stations {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+  }
+
+  .station {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  /* Dot after every station but the last, so a wrapped line never starts with one. */
+  .station:not(:last-child)::after {
+    content: '·';
+    margin-left: 4px;
+  }
+
+  .station__lines {
+    display: inline-flex;
+  }
+
+  .station__lines :global(.line:first-child) {
+    margin-left: 0;
+  }
+</style>

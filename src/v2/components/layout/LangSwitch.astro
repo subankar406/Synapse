@@ -1,0 +1,85 @@
+---
+import { getDictionary, localeLabel, localeUrl, locales, type Locale } from '../../../i18n';
+
+/** FR / EN switcher (links stay on /v2). `compact` is the plain variant used inside the mobile menu. */
+interface Props {
+  lang: Locale;
+  compact?: boolean;
+  class?: string;
+}
+
+const { lang, compact = false, class: className } = Astro.props;
+const t = getDictionary(lang);
+// The design lists French first.
+const ordered = [...locales].sort((a, b) => (a === 'fr' ? -1 : b === 'fr' ? 1 : 0));
+---
+
+{
+  compact ? (
+    <div class:list={['lang-compact', className]}>
+      {ordered.map((l) => (
+        <a href={localeUrl(l, 'v2/')} lang={l} aria-current={l === lang ? 'true' : undefined}>
+          {localeLabel[l]}
+        </a>
+      ))}
+    </div>
+  ) : (
+    <div class:list={['lang', className]} role="group" aria-label={t.common.chooseLanguage}>
+      {ordered.map((l, i) => (
+        <>
+          {i > 0 && (
+            <span class="lang__sep" aria-hidden="true">
+              /
+            </span>
+          )}
+          <a href={localeUrl(l, 'v2/')} lang={l} hreflang={l === lang ? undefined : l} aria-current={l === lang ? 'true' : undefined}>
+            {localeLabel[l]}
+          </a>
+        </>
+      ))}
+    </div>
+  )
+}
+
+<style>
+  .lang {
+    display: flex;
+    align-items: center;
+    font-size: var(--fs-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-caps);
+  }
+
+  .lang a {
+    padding: 12px 6px;
+    color: var(--color-rose);
+    text-decoration: none;
+  }
+
+  .lang a[aria-current] {
+    color: var(--color-cream);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+
+  .lang__sep {
+    color: var(--color-rose);
+  }
+
+  .lang-compact {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: var(--fs-sm);
+  }
+
+  .lang-compact a {
+    color: var(--color-rose);
+    text-decoration: none;
+  }
+
+  .lang-compact a[aria-current] {
+    color: var(--color-cream);
+    text-decoration: underline;
+  }
+</style>

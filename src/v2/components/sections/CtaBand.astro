@@ -1,0 +1,43 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import Logo from '../ui/Logo.astro';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Button from '../ui/Button.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section labelledby="cta-title" tone="blush" pad="xl" innerClass="cta">
+  <Logo slot="background" kind="mark" variant="dark" height={295} class="cta__mark" />
+  <Heading id="cta-title" size="cta" parts={t.cta.title} />
+  <Button modal="rdv" class="cta__btn">{t.common.book}</Button>
+</Section>
+
+<style>
+  :global(.cta) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    text-align: center;
+  }
+
+  :global(.cta__mark) {
+    position: absolute;
+    right: 6%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.14;
+    pointer-events: none;
+  }
+
+  :global(.cta__btn) {
+    --btn-px: 34px;
+  }
+</style>

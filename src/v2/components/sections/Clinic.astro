@@ -1,0 +1,212 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import { site } from '../../../data/site';
+import { gallery } from '../../../data/content';
+import { images } from '../../../data/images';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Media from '../ui/Media.astro';
+import RollText from '../ui/RollText.astro';
+import InfoItem from '../ui/InfoItem.astro';
+import StationList from '../ui/StationList.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+
+// Feature bullets alternate burgundy / forest across both columns.
+const dotTone = (i: number) => (i % 2 === 0 ? 'primary' : 'secondary');
+const left = t.clinic.featuresLeft;
+const right = t.clinic.featuresRight;
+---
+
+<Section id="cabinet" labelledby="cab-title" tone="white">
+  <Heading id="cab-title" size="wide" parts={t.clinic.title} spacing={44} />
+
+  <div class="gallery" data-stagger>
+    {
+      gallery.map((tile) => (
+        <button
+          type="button"
+          class:list={['gallery__tile', tile.area && `gallery__tile--${tile.area}`]}
+          data-lightbox="clinic"
+          data-lightbox-src={images[tile.image].src}
+          data-lightbox-alt={t.clinic.gallery[tile.key]}
+          aria-label={`${t.lightbox.open}: ${t.clinic.gallery[tile.key]}`}
+        >
+          <Media image={tile.image} alt="" class="gallery__img" />
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="features">
+    <ul class="reset-list" data-stagger>
+      {
+        left.map((text, i) => (
+          <li>
+            <span class={`features__dot features__dot--${dotTone(i)}`} aria-hidden="true" />
+            <span set:html={text} />
+          </li>
+        ))
+      }
+    </ul>
+    <ul class="reset-list" data-stagger>
+      {
+        right.map((text, i) => (
+          <li>
+            <span class={`features__dot features__dot--${dotTone(left.length + i)}`} aria-hidden="true" />
+            <span set:html={text} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <ul class="facts reset-list" data-stagger>
+    <InfoItem icon="pin" label={t.info.addressLabel}>
+      <a class="address-link" href={site.mapsUrl} target="_blank" rel="noopener"><RollText text={site.address.full} /></a>
+    </InfoItem>
+    <InfoItem icon="metro" tone="secondary" label={t.info.metroLabel}>
+      <StationList />
+    </InfoItem>
+    <InfoItem icon="clock" label={t.info.hoursLabel}>{t.info.hoursShort}</InfoItem>
+  </ul>
+</Section>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 280px 280px;
+    gap: 16px;
+  }
+
+  /* Each tile clips its image, which zooms on hover; click opens the lightbox. */
+  .gallery__tile {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+  }
+
+  .gallery__tile :global(.gallery__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .gallery__tile:hover :global(.gallery__img),
+    .gallery__tile:focus-visible :global(.gallery__img) {
+      transform: scale(1.06);
+    }
+  }
+
+  .gallery__tile--tall {
+    grid-row: 1 / 3;
+  }
+
+  .gallery__tile--wide {
+    grid-column: 2 / 4;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 64px;
+    align-items: start;
+    margin-top: 56px;
+  }
+
+  .features ul {
+    border-top: 1px solid var(--line-ink);
+  }
+
+  .features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line-ink);
+    font-size: var(--fs-xl);
+    line-height: 1.5;
+  }
+
+  .features__dot {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-top: 7px;
+    border-radius: var(--radius-pill);
+  }
+
+  .features__dot--primary {
+    background: var(--color-primary);
+  }
+
+  .features__dot--secondary {
+    background: var(--color-secondary);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 24px;
+    margin-top: 52px;
+  }
+
+  @media (max-width: 980px) {
+    .gallery {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 240px 180px 180px;
+    }
+
+    .gallery__tile--tall {
+      grid-column: 1 / 3;
+      grid-row: auto;
+    }
+
+    .gallery__tile--wide {
+      grid-column: auto;
+    }
+
+    .features {
+      column-gap: 32px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    /* Mobile: one image per row. */
+    .gallery {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery__tile {
+      aspect-ratio: 4 / 3;
+      height: auto;
+    }
+
+    .features {
+      grid-template-columns: 1fr;
+    }
+
+    .features ul + ul {
+      border-top: 0;
+    }
+
+    .features li {
+      font-size: 1rem;
+    }
+  }
+</style>

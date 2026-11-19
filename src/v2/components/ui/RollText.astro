@@ -1,0 +1,108 @@
+---
+/**
+ * Hover text effect: each letter folds up and away while a copy rolls in
+ * from below, staggered left to right, landing back in the same place.
+ * The real text stays in the DOM for screen readers; the letters are decorative.
+ */
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+// Letters are grouped per word so long text (e.g. an address) can still wrap.
+let i = 0;
+const words = text.split(' ').map((word) => [...word].map((char) => ({ char, i: i++ })));
+---
+
+<span class="roll">
+  <span class="visually-hidden">{text}</span>
+  <span class="roll__chars" aria-hidden="true">
+    {
+      words.map((word, w) => (
+        <>
+          {w > 0 && ' '}
+          <span class="roll__word">
+            {word.map(({ char, i }) => (
+              <span class="roll__char" style={`--i: ${i}`}>
+                <span class="roll__face">{char}</span>
+                <span class="roll__face roll__face--next">{char}</span>
+              </span>
+            ))}
+          </span>
+        </>
+      ))
+    }
+  </span>
+</span>
+
+<style>
+  .roll {
+    display: inline-block;
+    color: var(--roll-color, inherit);
+    cursor: pointer;
+    transition: color var(--dur-slow) var(--ease);
+  }
+
+  .roll__chars {
+    display: inline;
+    /* Tall enough line box that ascenders/descenders aren't clipped. */
+    line-height: 1.35;
+  }
+
+  .roll__word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .roll__char {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    perspective: 240px;
+  }
+
+  .roll__face {
+    display: block;
+    transform-origin: 50% 100%;
+    transition:
+      transform 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+    transition-delay: calc(var(--i) * 18ms);
+  }
+
+  .roll__face--next {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transform-origin: 50% 0%;
+    transform: rotateX(-90deg);
+    /* Fully hidden while folded, so no sliver shows under the text. */
+    opacity: 0;
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .roll:hover .roll__face,
+    :global(:is(a, button):hover) > .roll .roll__face {
+      transform: translateY(-100%) rotateX(90deg);
+      opacity: 0;
+    }
+
+    .roll:hover .roll__face--next,
+    :global(:is(a, button):hover) > .roll .roll__face--next {
+      transform: translateY(-100%) rotateX(0deg);
+      opacity: 1;
+    }
+
+    .roll:hover,
+    :global(:is(a, button):hover) > .roll {
+      color: var(--roll-hover-color, var(--color-rose));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .roll__face {
+      transition: none;
+    }
+  }
+</style>

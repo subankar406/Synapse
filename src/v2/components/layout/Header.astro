@@ -1,0 +1,248 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import { sections } from '../../../data/site';
+import Logo from '../ui/Logo.astro';
+import Button from '../ui/Button.astro';
+import LangSwitch from './LangSwitch.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<header class="header" data-header>
+  <div class="header__bar container">
+    <Logo variant="light" height={34} alt={t.common.homeLabel} class="header__logo" />
+
+    <nav class="header__nav" aria-label={t.nav.label}>
+      {sections.map((id) => <a class="navlink" href={`#${id}`}>{t.nav.items[id]}</a>)}
+    </nav>
+
+    <div class="header__actions">
+      <LangSwitch lang={lang} class="hide-mobile" />
+      <Button variant="cream" size="md" modal="rdv" class="hide-mobile">{t.common.book}</Button>
+      <button class="burger" type="button" aria-label={t.common.menu} aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+        <span class="burger__line" aria-hidden="true"></span>
+        <span class="burger__line" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Full-screen menu (below 1180px). The booking CTA lives at its bottom. -->
+  <nav id="mobile-menu" class="menu" aria-label={t.common.menu} data-open="false" inert>
+    <div class="menu__links container">
+      {
+        sections.map((id, i) => (
+          <a class="navlink menu__link" href={`#${id}`} style={`--i: ${i}`} data-menu-close>
+            {t.nav.items[id]}
+          </a>
+        ))
+      }
+    </div>
+    <div class="menu__footer container">
+      <LangSwitch lang={lang} compact />
+      <Button variant="cream" modal="rdv" block class="menu__cta">{t.common.book}</Button>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-menu');
+
+  const setOpen = (open: boolean) => {
+    if (!toggle || !menu) return;
+    menu.dataset.open = String(open);
+    menu.inert = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    document.documentElement.classList.toggle('menu-open', open);
+  };
+
+  toggle?.addEventListener('click', () => setOpen(menu?.dataset.open !== 'true'));
+  menu?.querySelectorAll('[data-menu-close]').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('modal:open', () => setOpen(false));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+  // Close if the viewport grows past the breakpoint while open.
+  window.matchMedia('(min-width: 1181px)').addEventListener('change', (e) => e.matches && setOpen(false));
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--color-burgundy);
+    color: var(--color-cream);
+  }
+
+  .header :global(a:focus-visible),
+  .header :global(button:focus-visible) {
+    outline-color: var(--color-cream);
+  }
+
+  .header__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 16px;
+  }
+
+  .header__nav {
+    display: flex;
+    gap: 30px;
+    font-size: var(--fs-md);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .navlink {
+    color: var(--color-cream);
+    text-decoration: none;
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .navlink:hover {
+      color: var(--color-white);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+  }
+
+  /* Hamburger that morphs into a cross. */
+  .burger {
+    position: relative;
+    display: none;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(253, 241, 226, 0.5);
+    background: transparent;
+    color: var(--color-cream);
+    cursor: pointer;
+  }
+
+  .burger__line {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18px;
+    height: 2px;
+    margin-left: -9px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform var(--dur-slow) cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .burger__line:nth-child(1) {
+    transform: translateY(-5px);
+  }
+
+  .burger__line:nth-child(2) {
+    transform: translateY(3px);
+  }
+
+  .burger[aria-expanded='true'] .burger__line:nth-child(1) {
+    transform: translateY(-1px) rotate(45deg);
+  }
+
+  .burger[aria-expanded='true'] .burger__line:nth-child(2) {
+    transform: translateY(-1px) rotate(-45deg);
+  }
+
+  /* Full-screen menu: sits under the header bar and fills the viewport. */
+  .header__bar {
+    position: relative;
+    z-index: 2;
+    background: var(--color-burgundy);
+  }
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100dvh;
+    padding-top: var(--header-h);
+    background: var(--color-burgundy);
+    /* Slides down from the top when opened, back up when closed. */
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+      visibility 0.55s;
+  }
+
+  .menu[data-open='true'] {
+    transform: none;
+    visibility: visible;
+  }
+
+  /* .container centres itself with auto margins; stretch it so content aligns left. */
+  .menu__links,
+  .menu__footer {
+    width: 100%;
+  }
+
+  .menu__links {
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    border-top: 1px solid rgba(253, 241, 226, 0.2);
+    font-size: var(--fs-menu);
+    font-weight: var(--weight-bold);
+  }
+
+  .menu__link {
+    padding: 12px 0;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.4s var(--ease),
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .menu[data-open='true'] .menu__link {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(250ms + var(--i) * 45ms);
+  }
+
+  .menu__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .menu :global(.menu__cta) {
+    justify-content: center;
+  }
+
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+
+  @media (max-width: 1180px) {
+    .header__nav {
+      display: none;
+    }
+
+    .burger {
+      display: inline-block;
+    }
+
+    .menu {
+      display: flex;
+    }
+  }
+</style>

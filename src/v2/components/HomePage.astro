@@ -1,0 +1,56 @@
+---
+import type { Locale } from '../../i18n';
+import { team } from '../../data/team';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from './layout/Header.astro';
+import Footer from './layout/Footer.astro';
+import Hero from './sections/Hero.astro';
+import Clinic from './sections/Clinic.astro';
+import Team from './sections/Team.astro';
+import Expertises from './sections/Expertises.astro';
+import Vision from './sections/Vision.astro';
+import Pricing from './sections/Pricing.astro';
+import PracticalInfo from './sections/PracticalInfo.astro';
+import Faq from './sections/Faq.astro';
+import CtaBand from './sections/CtaBand.astro';
+import BookingModal from './modals/BookingModal.astro';
+import PhysioModal from './modals/PhysioModal.astro';
+import Lightbox from './ui/Lightbox.astro';
+
+/** Version 2 (/v2): the site as it was before matching the mobile design 1:1. Rendered once per locale. */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+---
+
+<BaseLayout lang={lang} noindex>
+  <Header lang={lang} />
+  <main>
+    <Hero lang={lang} />
+    <Clinic lang={lang} />
+    <Team lang={lang} />
+    <Expertises lang={lang} />
+    <Vision lang={lang} />
+    <Pricing lang={lang} />
+    <PracticalInfo lang={lang} />
+    <Faq lang={lang} />
+    <CtaBand lang={lang} />
+  </main>
+  <Footer lang={lang} />
+
+  <BookingModal lang={lang} />
+  {team.map((physio) => <PhysioModal lang={lang} physio={physio} />)}
+  <Lightbox lang={lang} />
+</BaseLayout>
+
+
+<style is:global>
+  /* Mobile body copy: every paragraph at 1rem, overriding component sizes. */
+  @media (max-width: 767px) {
+    p {
+      font-size: 1rem !important;
+    }
+  }
+</style>

@@ -1,0 +1,266 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import Icon from './Icon.astro';
+import IconSwap from './IconSwap.astro';
+
+/**
+ * One shared image lightbox for the page. Any element with
+ *   data-lightbox="<group>" data-lightbox-src="…" data-lightbox-alt="…"
+ * opens it on click; elements with the same group are browsable with the
+ * arrows, ←/→ keys or a swipe. Esc or a click on any empty space closes it.
+ */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<dialog class="lightbox" aria-label={t.lightbox.label} data-lightbox-dialog>
+  <figure class="lightbox__figure">
+    <!-- Stage wraps the image so the arrows sit just outside its edges at any size. -->
+    <div class="lightbox__stage">
+      <img class="lightbox__img" alt="" data-lightbox-img />
+      <!-- Pinned to the viewport corner on desktop; sits just above the image on mobile. -->
+      <button type="button" class="lightbox__close" aria-label={t.common.close} data-lightbox-close>
+        <Icon name="close" size={20} strokeWidth={2.2} />
+      </button>
+      <button type="button" class="lightbox__nav lightbox__nav--prev" aria-label={t.lightbox.prev} data-lightbox-prev>
+        <IconSwap name="arrow-left" size={22} strokeWidth={2.2} direction="left" clip="parent" />
+      </button>
+      <button type="button" class="lightbox__nav lightbox__nav--next" aria-label={t.lightbox.next} data-lightbox-next>
+        <IconSwap name="arrow-right" size={22} strokeWidth={2.2} direction="right" clip="parent" />
+      </button>
+    </div>
+  </figure>
+</dialog>
+
+<script>
+  const dialog = document.querySelector('[data-lightbox-dialog]');
+  const img = dialog.querySelector('[data-lightbox-img]');
+  const prev = dialog.querySelector('[data-lightbox-prev]');
+  const next = dialog.querySelector('[data-lightbox-next]');
+  let items = [];
+  let index = 0;
+
+  const show = (i, direction = 0) => {
+    index = (i + items.length) % items.length;
+    const item = items[index];
+    img.src = item.dataset.lightboxSrc;
+    img.alt = item.dataset.lightboxAlt || '';
+    const single = items.length < 2;
+    prev.hidden = single;
+    next.hidden = single;
+    img.animate(
+      [
+        { opacity: 0, transform: `translateX(${direction * 24}px) scale(${direction ? 1 : 0.96})` },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 380, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    );
+  };
+
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-lightbox]');
+    if (!trigger) return;
+    items = [...document.querySelectorAll(`[data-lightbox="${trigger.dataset.lightbox}"]`)];
+    dialog.showModal();
+    show(items.indexOf(trigger));
+  });
+
+  prev.addEventListener('click', () => show(index - 1, -1));
+  next.addEventListener('click', () => show(index + 1, 1));
+  dialog.querySelector('[data-lightbox-close]').addEventListener('click', () => dialog.close());
+  // Any click on empty space (not the image or a control) closes the lightbox.
+  let swiped = false;
+  dialog.addEventListener('click', (e) => {
+    if (swiped) return (swiped = false);
+    if (!e.target.closest('img, button')) dialog.close();
+  });
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(index - 1, -1);
+    if (e.key === 'ArrowRight') show(index + 1, 1);
+  });
+
+  // Swipe on touch screens.
+  let startX = null;
+  dialog.addEventListener('pointerdown', (e) => (startX = e.clientX));
+  dialog.addEventListener('pointerup', (e) => {
+    if (startX === null || items.length < 2) return;
+    const dx = e.clientX - startX;
+    startX = null;
+    if (Math.abs(dx) > 50) {
+      swiped = true;
+      show(index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+    }
+  });
+</script>
+
+<style>
+  /* Fill the viewport (100% not 100vw, so it never sits under the scrollbar). */
+  .lightbox {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-cream);
+    overflow: hidden;
+    /* Touch gestures are ours (swipe between images), never page scroll. */
+    touch-action: none;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .lightbox::backdrop {
+    background: rgba(25, 0, 6, 0.92);
+  }
+
+  .lightbox__figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+    --lb-pad-x: 120px;
+    padding: 88px var(--lb-pad-x);
+    max-width: 100%;
+  }
+
+  .lightbox__img {
+    /* Viewport-based (not %) so the stage can size itself from the image. */
+    max-width: min(1200px, calc(100vw - 2 * var(--lb-pad-x)));
+    max-height: calc(100dvh - 176px);
+    display: block;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+  }
+
+  .lightbox__nav,
+  .lightbox__close {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+  }
+
+  /* Clips the arrow as it slides out (IconSwap). */
+  .lightbox__nav {
+    overflow: hidden;
+  }
+
+  .lightbox__nav[hidden] {
+    display: none;
+  }
+
+  .lightbox__nav {
+    top: 50%;
+    width: 56px;
+    height: 56px;
+    transform: translateY(-50%);
+    background: var(--color-cream);
+    color: var(--color-burgundy);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Shrinks to the image so the image (and its arrows) stay centred. */
+  .lightbox__stage {
+    position: relative;
+    width: fit-content;
+    margin-inline: auto;
+  }
+
+  /* 16px outside the image edges. */
+  .lightbox__nav--prev {
+    left: -72px;
+  }
+
+  .lightbox__nav--next {
+    right: -72px;
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .lightbox__nav:hover {
+      transform: translateY(calc(-50% - 4px));
+    }
+  }
+
+  .lightbox__close {
+    position: fixed;
+    top: 32px;
+    right: 40px;
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: 1px solid rgba(253, 241, 226, 0.4);
+    color: var(--color-cream);
+  }
+
+  .lightbox__close :global(svg) {
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .lightbox__close:hover :global(svg) {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .lightbox__figure {
+      --lb-pad-x: 16px;
+      padding: 88px var(--lb-pad-x) 96px;
+    }
+
+    .lightbox__nav {
+      top: calc(100% + 16px);
+      bottom: auto;
+      width: 44px;
+      height: 44px;
+      transform: none;
+    }
+
+    .lightbox__nav--prev {
+      left: calc(50% - 52px);
+    }
+
+    /* Just above the image, lined up with its right edge (16px from the screen edge). */
+    .lightbox__close {
+      position: absolute;
+      top: auto;
+      bottom: calc(100% + 12px);
+      right: 0;
+      width: 44px;
+      height: 44px;
+    }
+
+    .lightbox__nav--next {
+      right: calc(50% - 52px);
+    }
+
+    .lightbox__figure {
+      padding-bottom: 120px;
+    }
+  }
+
+  /* Small phones: a square image filling the width. */
+  @media (max-width: 479px) {
+    .lightbox__img {
+      width: calc(100vw - 2 * var(--lb-pad-x));
+      max-height: none;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+  }
+</style>

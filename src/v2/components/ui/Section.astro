@@ -1,0 +1,98 @@
+---
+/**
+ * Full-bleed page section with a centred container.
+ * `tone` sets the background/foreground pair; `pad` the vertical rhythm.
+ */
+type Tone = 'cream' | 'white' | 'forest' | 'burgundy' | 'blush' | 'ink';
+type Pad = 'default' | 'sm' | 'lg' | 'xl' | 'none';
+type Width = 'default' | 'narrow';
+
+interface Props {
+  id?: string;
+  labelledby?: string;
+  tone?: Tone;
+  pad?: Pad;
+  width?: Width;
+  class?: string;
+  innerClass?: string;
+}
+
+const { id, labelledby, tone = 'cream', pad = 'default', width = 'default', class: className, innerClass } = Astro.props;
+---
+
+<section id={id} aria-labelledby={labelledby} class:list={['section', `section--${tone}`, className]}>
+  <slot name="background" />
+  <div class:list={['section__inner', `section__inner--${width}`, `section__inner--pad-${pad}`, innerClass]} data-anim-scope>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    position: relative;
+    background: var(--section-bg);
+    color: var(--section-fg);
+  }
+
+  .section--cream {
+    --section-bg: var(--color-cream);
+    --section-fg: var(--color-text);
+  }
+
+  .section--white {
+    --section-bg: var(--color-white);
+    --section-fg: var(--color-text);
+  }
+
+  .section--blush {
+    --section-bg: var(--color-blush);
+    --section-fg: var(--color-text);
+    overflow: hidden;
+  }
+
+  .section--forest {
+    --section-bg: var(--color-forest);
+    --section-fg: var(--color-on-dark);
+  }
+
+  .section--burgundy {
+    --section-bg: var(--color-burgundy);
+    --section-fg: var(--color-on-dark);
+    overflow: hidden;
+  }
+
+  .section--ink {
+    --section-bg: var(--color-ink);
+    --section-fg: var(--color-on-dark);
+  }
+
+  .section__inner {
+    position: relative;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section__inner--default {
+    max-width: var(--container);
+  }
+
+  .section__inner--narrow {
+    max-width: var(--container-narrow);
+  }
+
+  .section__inner--pad-default {
+    padding-block: var(--section-pad);
+  }
+
+  .section__inner--pad-sm {
+    padding-block: var(--section-pad-sm);
+  }
+
+  .section__inner--pad-lg {
+    padding-block: var(--section-pad-lg);
+  }
+
+  .section__inner--pad-xl {
+    padding-block: var(--section-pad-xl);
+  }
+</style>

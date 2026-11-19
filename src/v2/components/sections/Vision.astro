@@ -1,0 +1,246 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import Logo from '../ui/Logo.astro';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section id="vision" labelledby="vis-title" tone="burgundy" pad="lg" width="narrow" innerClass="vision">
+  <Logo slot="background" kind="mark" variant="light" height={610} class="vision__mark" />
+
+  <Heading id="vis-title" size="vision" parts={t.vision.title} />
+  <p class="vision__lede" data-scroll-reveal>{t.vision.lede}</p>
+  <p class="vision__text" data-scroll-reveal><strong>{t.vision.highlight}</strong></p>
+
+  <button type="button" class="vision__toggle" aria-expanded="false" aria-controls="vision-more" data-vision-toggle>
+    {t.vision.more}
+    <Icon name="chevron-down" size={16} strokeWidth={2.2} />
+  </button>
+
+  <div id="vision-more" class="vision__more" hidden>
+    {t.vision.details.map((p) => <p class="vision__text" set:html={p} data-scroll-reveal />)}
+    <p class="vision__text vision__closing" set:html={t.vision.closing} data-scroll-reveal />
+    <button type="button" class="vision__toggle" aria-expanded="true" aria-controls="vision-more" data-vision-toggle>
+      {t.vision.less}
+      <Icon name="chevron-up" size={16} strokeWidth={2.2} />
+    </button>
+  </div>
+
+  <Button variant="cream" size="md" modal="rdv" class="vision__cta">{t.common.book}</Button>
+</Section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  // "Learn more" sits before the panel, "Show less" at its end; only one is visible at a time.
+  // The panel takes the "Learn more" button's slot, so it grows from / shrinks to that
+  // button's height — the content below never jumps.
+  const panel = document.getElementById('vision-more');
+  const [more] = document.querySelectorAll<HTMLButtonElement>('[data-vision-toggle]');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const layoutChange = () => document.dispatchEvent(new Event('layout:change'));
+  let collapsedHeight = 0;
+
+  function expand() {
+    if (!panel || !more) return;
+    collapsedHeight = more.offsetHeight;
+    more.hidden = true;
+    more.setAttribute('aria-expanded', 'true');
+    panel.hidden = false;
+    layoutChange();
+    gsap.fromTo(
+      panel,
+      { height: collapsedHeight, opacity: 0, overflow: 'hidden' },
+      {
+        height: 'auto',
+        opacity: 1,
+        duration: reduced.matches ? 0 : 0.7,
+        ease: 'power3.inOut',
+        clearProps: 'height,opacity,overflow',
+        onComplete: layoutChange,
+      },
+    );
+  }
+
+  function collapse() {
+    if (!panel || !more) return;
+    gsap.to(panel, {
+      height: collapsedHeight,
+      opacity: 0,
+      overflow: 'hidden',
+      duration: reduced.matches ? 0 : 0.6,
+      ease: 'power3.inOut',
+      onComplete: () => {
+        gsap.set(panel, { clearProps: 'height,opacity,overflow' });
+        panel.hidden = true;
+        more.hidden = false;
+        more.setAttribute('aria-expanded', 'false');
+        more.focus({ preventScroll: true });
+        if (more.getBoundingClientRect().top < 0) {
+          more.scrollIntoView({ block: 'center', behavior: reduced.matches ? 'auto' : 'smooth' });
+        }
+        layoutChange();
+      },
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-vision-toggle]').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      if (!panel || gsap.isTweening(panel)) return;
+      if (panel.hidden) expand();
+      else collapse();
+    });
+  });
+</script>
+
+<style>
+  :global(.vision) {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  :global(.vision__mark) {
+    position: absolute;
+    right: -160px;
+    top: -140px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .vision__lede {
+    margin: 0;
+    font-size: var(--fs-lede-lg);
+    line-height: 1.42;
+    letter-spacing: -0.01em;
+  }
+
+  .vision__text {
+    margin: 0;
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+    color: var(--color-on-dark-muted);
+  }
+
+  .vision__text :global(strong) {
+    color: var(--color-on-dark);
+  }
+
+  .vision__more {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .vision__more[hidden] {
+    display: none;
+  }
+
+  .vision__closing {
+    padding-top: 28px;
+    border-top: 1px solid var(--line-cream-strong);
+  }
+
+  .vision__toggle {
+    position: relative;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 5.5px;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--fs-md);
+    font-weight: var(--weight-bold);
+    color: var(--color-cream);
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Underline: on hover it wipes off to the right and redraws from the left. */
+  .vision__toggle::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.5px;
+    background: currentColor;
+  }
+
+  .vision__toggle :global(svg) {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes underline-sweep {
+    0% {
+      transform: scaleX(1);
+      transform-origin: right;
+    }
+    50% {
+      transform: scaleX(0);
+      transform-origin: right;
+    }
+    50.01% {
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    100% {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .vision__toggle:hover {
+      transform: translateY(-4px);
+    }
+
+    .vision__toggle:hover::after {
+      animation: underline-sweep 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* The chevron nudges the way it points: down for "Learn more", up for "Show less". */
+    .vision__toggle[aria-expanded='false']:hover :global(svg) {
+      transform: translateY(3px);
+    }
+
+    .vision__toggle[aria-expanded='true']:hover :global(svg) {
+      transform: translateY(-3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vision__toggle:hover::after {
+      animation: none;
+    }
+  }
+
+  .vision__toggle[hidden] {
+    display: none;
+  }
+
+  :global(.vision__cta) {
+    align-self: flex-start;
+    margin-top: 6px;
+  }
+
+
+  /* Mobile: all paragraph text at 1rem. */
+  @media (max-width: 767px) {
+    .vision__lede,
+    .vision__text {
+      font-size: 1rem;
+    }
+  }
+</style>

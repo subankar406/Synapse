@@ -6,9 +6,11 @@ import { structuredData } from '../lib/seo';
 
 interface Props {
   lang: Locale;
+  /** Keep this page out of search results (e.g. the /v2 alternate version). */
+  noindex?: boolean;
 }
 
-const { lang } = Astro.props;
+const { lang, noindex = false } = Astro.props;
 const t = getDictionary(lang);
 
 const pageUrl = new URL(localeUrl(lang), Astro.site).href;
@@ -25,6 +27,7 @@ const jsonLd = JSON.stringify(structuredData(t, pageUrl, ogImage));
     <title>{t.meta.title}</title>
     <meta name="description" content={t.meta.description} />
     <link rel="canonical" href={pageUrl} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     {locales.map((l) => <link rel="alternate" hreflang={l} href={new URL(localeUrl(l), Astro.site)} />)}

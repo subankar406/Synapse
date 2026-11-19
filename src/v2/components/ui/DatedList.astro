@@ -1,0 +1,38 @@
+---
+import type { DatedLine, Tone } from '../../../i18n/types';
+
+/** Titled list of "date · text" lines (degrees, experience, trainings). */
+interface Props {
+  title: string;
+  items: DatedLine[];
+  tone?: Tone;
+}
+
+const { title, items, tone = 'primary' } = Astro.props;
+---
+
+<div class="dated">
+  <h3 class={`dated__title tone-${tone}`}>{title}</h3>
+  {
+    items.map((item) => (
+      <span>
+        <strong>{item.date}</strong> · {item.text}
+      </span>
+    ))
+  }
+</div>
+
+<style>
+  .dated {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: var(--fs-xs);
+    line-height: 1.45;
+  }
+
+  .dated__title {
+    margin: 0 0 4px;
+    font-size: var(--fs-xs);
+  }
+</style>

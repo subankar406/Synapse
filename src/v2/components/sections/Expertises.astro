@@ -1,0 +1,292 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import { expertiseImages } from '../../../data/content';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+import Media from '../ui/Media.astro';
+import IconSwap from '../ui/IconSwap.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+const items = t.expertises.items.map((copy, i) => ({ ...copy, ...expertiseImages[i] }));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Section id="expertises" labelledby="exp-title" tone="forest">
+  <Heading id="exp-title" parts={t.expertises.title} spacing={44} />
+
+  <div class="carousel" data-carousel>
+    <div class="carousel__track" data-track data-stagger tabindex="0" role="region" aria-label={t.expertises.trackLabel}>
+      {
+        items.map((item) => (
+          <article class="card">
+            <Media image={item.image} alt={item.alt} flat={!item.photo} class="card__media" />
+            <div class="card__body">
+              <h3 class="card__title">{item.title}</h3>
+              <p class="card__text">{item.text}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+    <button class="carousel__arrow carousel__arrow--prev" type="button" aria-label={t.expertises.prev} data-prev hidden>
+      <IconSwap name="arrow-left" size={24} strokeWidth={2.2} direction="left" clip="parent" />
+    </button>
+    <button class="carousel__arrow carousel__arrow--next" type="button" aria-label={t.expertises.next} data-next>
+      <IconSwap name="arrow-right" size={24} strokeWidth={2.2} direction="right" clip="parent" />
+    </button>
+  </div>
+
+  <div class="progress">
+    <span data-counter>01</span>
+    <div class="progress__bar"><div class="progress__fill" data-fill style={`width: ${100 / items.length}%`}></div></div>
+    <span class="progress__total" data-total>{pad(items.length)}</span>
+  </div>
+</Section>
+
+<script>
+  /**
+   * Paged by scroll position, not by card: the counter shows how many stops
+   * the track actually has (cards that fit on screen don't need their own
+   * stop), so with 3 visible cards out of 6 there are 4 stops. Recomputed on
+   * resize, so mobile (1 card visible) gets 6. One stop per click, no looping,
+   * arrows hide at each end.
+   */
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const section = root.closest('section')!;
+    const counter = section.querySelector<HTMLElement>('[data-counter]');
+    const totalLabel = section.querySelector<HTMLElement>('[data-total]');
+    const fill = section.querySelector<HTMLElement>('[data-fill]');
+    const cards = [...track.children] as HTMLElement[];
+    const pad = (n: number) => String(n).padStart(2, '0');
+    let stops: number[] = [0];
+    let index = 0;
+    let settleTimer = 0;
+
+    /** Scroll offsets the track can actually reach: one per card until the end is reached. */
+    const measure = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const offsets = cards.map((c) => c.offsetLeft - cards[0].offsetLeft).filter((o) => o < max - 1);
+      stops = max > 1 ? [...offsets, max] : [0];
+      index = Math.min(index, stops.length - 1);
+    };
+
+    const render = () => {
+      const count = stops.length;
+      if (counter) counter.textContent = pad(index + 1);
+      if (totalLabel) totalLabel.textContent = pad(count);
+      if (fill) fill.style.width = `${((index + 1) / count) * 100}%`;
+      prev.hidden = index === 0;
+      next.hidden = index === count - 1;
+    };
+
+    const goTo = (i: number) => {
+      index = Math.min(Math.max(i, 0), stops.length - 1);
+      track.scrollTo({ left: stops[index], behavior: 'smooth' });
+      render();
+    };
+
+    next.addEventListener('click', () => goTo(index + 1));
+    prev.addEventListener('click', () => goTo(index - 1));
+
+    // Swipes/drags: snap the counter to the nearest stop once scrolling settles.
+    const settle = () => {
+      const left = track.scrollLeft;
+      index = stops.reduce((best, stop, i) => (Math.abs(stop - left) < Math.abs(stops[best] - left) ? i : best), 0);
+      render();
+    };
+
+    if ('onscrollend' in window) track.addEventListener('scrollend', settle);
+    else
+      track.addEventListener('scroll', () => {
+        clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(settle, 120);
+      });
+
+    new ResizeObserver(() => {
+      measure();
+      settle();
+    }).observe(track);
+
+    measure();
+    render();
+  });
+</script>
+
+<style>
+  /* Rounded viewport: cards are clipped cleanly as they slide out. */
+  .carousel {
+    position: relative;
+    /* Lets the arrows size their offset from the carousel width (cqw). */
+    container-type: inline-size;
+    border-radius: var(--radius-lg);
+    overflow: clip;
+  }
+
+  .carousel__track {
+    --card-w: min(370px, 82%);
+    --card-gap: 28px;
+    display: flex;
+    gap: var(--card-gap);
+    /* Keep the last text line clear of the wrapper's rounded bottom corners. */
+    padding-bottom: var(--radius-lg);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 var(--card-w);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card :global(.card__media) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 12px;
+  }
+
+  .card__title {
+    margin: 0;
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-title);
+  }
+
+  .card__text {
+    margin: 0;
+    font-size: var(--fs-base);
+    color: var(--color-mint);
+  }
+
+  .carousel__arrow {
+    position: absolute;
+    /* Centred on the card image: card width (as in --card-w) × 3/4 aspect ÷ 2. */
+    top: calc(min(370px, 82cqw) * 0.375);
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--radius-pill);
+    /* Clips the arrow as it slides out (IconSwap). */
+    overflow: hidden;
+    cursor: pointer;
+    /* Both arrows: cream with a forest icon, burgundy on hover. */
+    background: var(--color-cream);
+    color: var(--color-forest);
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color var(--dur-slow) var(--ease),
+      color var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .carousel__arrow:hover,
+    .carousel__arrow:focus-visible {
+      background: var(--color-burgundy);
+      color: var(--color-cream);
+      transform: translateY(calc(-50% - 4px));
+    }
+  }
+
+  .carousel__arrow[hidden] {
+    display: none;
+  }
+
+  .carousel__arrow--prev {
+    left: 14px;
+    width: 60px;
+    height: 60px;
+    box-shadow: var(--shadow-float-strong);
+  }
+
+  .carousel__arrow--next {
+    right: 14px;
+    width: 60px;
+    height: 60px;
+    box-shadow: var(--shadow-float-strong);
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: calc(40px - var(--radius-lg));
+    font-size: var(--fs-xs);
+    font-weight: var(--weight-bold);
+  }
+
+  .progress__bar {
+    flex: 1;
+    height: 2px;
+    border-radius: 2px;
+    overflow: hidden;
+    background: var(--line-cream);
+  }
+
+  .progress__fill {
+    height: 100%;
+    background: var(--color-cream);
+    transition: width var(--dur-slow) var(--ease);
+  }
+
+  .progress__total {
+    color: var(--color-sage);
+  }
+
+  @media (max-width: 767px) {
+    .carousel__arrow--prev {
+      left: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .carousel__arrow--next {
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .carousel__arrow :global(.icon-swap) {
+      width: 18px;
+      height: 18px;
+    }
+
+    .carousel__arrow :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+
+  /* Mobile: all paragraph text at 1rem. */
+  @media (max-width: 767px) {
+    .card__text {
+      font-size: 1rem;
+    }
+  }
+</style>

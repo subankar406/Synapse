@@ -1,0 +1,64 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import { site } from '../../../data/site';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+
+/** Google Maps embed of the clinic, localised to the page language. */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+const src = site.mapsEmbed.replaceAll('{lang}', lang);
+---
+
+<div class="map-embed">
+  <iframe
+    class="map-embed__frame"
+    src={src}
+    title={t.map.title}
+    loading="lazy"
+    allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <Button href={site.mapsUrl} external size="xs" class="map-embed__link">
+    <Icon name="pin" size={16} />
+    {t.map.openInMaps}
+  </Button>
+</div>
+
+<style>
+  .map-embed {
+    position: relative;
+  }
+
+  .map-embed__frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-mint);
+  }
+
+  :global(.map-embed__link) {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    --btn-py: 12px;
+    --btn-px: 18px;
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (max-width: 767px) {
+    .map-embed__frame {
+      aspect-ratio: 1 / 1;
+    }
+
+    :global(.map-embed__link) {
+      position: static;
+      margin-top: 12px;
+    }
+  }
+</style>

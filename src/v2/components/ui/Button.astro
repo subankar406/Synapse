@@ -1,0 +1,179 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
+import IconSwap from './IconSwap.astro';
+
+/**
+ * Pill button. Renders an <a> when `href` is set, otherwise a <button>.
+ * Pass `modal="rdv"` (etc.) to open a <Modal id="rdv"> on click.
+ */
+type Variant = 'primary' | 'secondary' | 'cream';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+interface Props {
+  variant?: Variant;
+  size?: Size;
+  href?: string;
+  external?: boolean;
+  modal?: string;
+  icon?: IconName;
+  iconSize?: number;
+  /** Stretch to fill its container (with the icon pushed to the far end). */
+  block?: boolean;
+  class?: string;
+  'aria-label'?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'lg',
+  href,
+  external = false,
+  modal,
+  icon,
+  iconSize = 16,
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, block && 'btn--block', className];
+
+/** Arrow icons slide out and back in on hover; the plus spins. */
+const swap = { external: 'up-right', 'arrow-right': 'right', 'arrow-left': 'left' } as const;
+const swapDirection = icon && icon in swap ? swap[icon as keyof typeof swap] : undefined;
+const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+{
+  href ? (
+    <a class:list={classes} href={href} {...linkAttrs} {...rest}>
+      <slot />
+      {icon && swapDirection && <IconSwap name={icon} size={iconSize} direction={swapDirection} />}
+      {icon && !swapDirection && <Icon name={icon} size={iconSize} class={`btn__icon btn__icon--${icon}`} />}
+    </a>
+  ) : (
+    <button class:list={classes} type="button" data-modal-open={modal} {...rest}>
+      <slot />
+      {icon && swapDirection && <IconSwap name={icon} size={iconSize} strokeWidth={2.2} direction={swapDirection} />}
+      {icon && !swapDirection && <Icon name={icon} size={iconSize} strokeWidth={2.2} class={`btn__icon btn__icon--${icon}`} />}
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    font: inherit;
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .btn:hover {
+      transform: translateY(-4px);
+      background: var(--btn-bg-hover);
+      color: var(--btn-fg-hover);
+    }
+  }
+
+  .btn :global(.btn__icon--plus) {
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .btn:hover :global(.btn__icon--plus),
+    .btn:focus-visible :global(.btn__icon--plus) {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn :global(.btn__icon--plus) {
+      transition: none;
+    }
+  }
+
+  .btn--primary {
+    --btn-bg: var(--color-primary);
+    --btn-fg: var(--color-on-dark);
+    --btn-bg-hover: var(--color-primary-hover);
+    --btn-fg-hover: var(--color-on-dark);
+  }
+
+  .btn--secondary {
+    --btn-bg: var(--color-secondary);
+    --btn-fg: var(--color-on-dark);
+    --btn-bg-hover: var(--color-secondary-hover);
+    --btn-fg-hover: var(--color-on-dark);
+  }
+
+  .btn--cream {
+    --btn-bg: var(--color-cream);
+    --btn-fg: var(--color-primary);
+    --btn-bg-hover: var(--color-white);
+    --btn-fg-hover: var(--color-primary);
+  }
+
+  /* Sizes set padding/font variables at zero specificity, so a component can
+     override --btn-py / --btn-px with a single class. Mobile scales the padding. */
+  :where(.btn--xs) {
+    --btn-py: 10px;
+    --btn-px: 18px;
+    --btn-fs: var(--fs-xs);
+  }
+
+  :where(.btn--sm) {
+    --btn-py: 14px;
+    --btn-px: 22px;
+    --btn-fs: var(--fs-sm);
+  }
+
+  :where(.btn--md) {
+    --btn-py: 14px;
+    --btn-px: 26px;
+    --btn-fs: var(--fs-base);
+  }
+
+  :where(.btn--lg) {
+    --btn-py: 18px;
+    --btn-px: 32px;
+    --btn-fs: var(--fs-md);
+  }
+
+  :where(.btn--xl) {
+    --btn-py: 20px;
+    --btn-px: 24px;
+    --btn-fs: var(--fs-base);
+  }
+
+  .btn {
+    padding: calc(var(--btn-py) * var(--btn-scale, 1)) calc(var(--btn-px) * var(--btn-scale, 1));
+    font-size: var(--btn-fs);
+  }
+
+  /* Mobile: buttons at 60% of their desktop padding, labels at 14px. */
+  @media (max-width: 767px) {
+    .btn {
+      --btn-scale: 0.6;
+      font-size: var(--fs-xs);
+    }
+  }
+
+  .btn--block {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+</style>

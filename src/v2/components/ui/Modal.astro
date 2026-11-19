@@ -1,0 +1,159 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * Accessible modal built on native <dialog>. Open it from anywhere with
+ * `data-modal-open="<id>"` (see Button `modal` prop); scripts/modals.ts
+ * handles opening, closing and backdrop clicks.
+ *
+ * Content scrolls inside `.modal__scroll` (scrollbar hidden) so the close
+ * button stays put. In `split` mode the media column is sticky and lines up
+ * with the top of the content.
+ */
+interface Props {
+  id: string;
+  labelledby: string;
+  closeLabel: string;
+  size?: 'sm' | 'lg';
+  split?: boolean;
+}
+
+const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
+---
+
+<dialog id={`modal-${id}`} class:list={['modal', `modal--${size}`, { 'modal--split': split }]} aria-labelledby={labelledby}>
+  <button type="button" class="modal__close" data-modal-close aria-label={closeLabel}>
+    <Icon name="close" size={18} strokeWidth={2.2} />
+  </button>
+  <div class="modal__scroll" data-modal-scroll>
+    {
+      split && (
+        <div class="modal__media">
+          <slot name="media" />
+        </div>
+      )
+    }
+    <div class="modal__body">
+      <slot />
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .modal {
+    --modal-pad: clamp(24px, 4vw, 44px);
+    position: fixed;
+    width: calc(100% - 32px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-cream);
+    color: var(--color-text);
+    overflow: hidden;
+  }
+
+  .modal::backdrop {
+    background: var(--overlay);
+  }
+
+  .modal--sm {
+    max-width: 620px;
+  }
+
+  .modal--lg {
+    max-width: 920px;
+  }
+
+  .modal__scroll {
+    max-height: var(--modal-max-h, 75vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .modal__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .modal--sm .modal__scroll {
+    --modal-max-h: calc(100vh - 32px);
+  }
+
+  .modal--split .modal__scroll {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .modal__media {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: var(--modal-pad) 0 var(--modal-pad) var(--modal-pad);
+  }
+
+  .modal__body {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: clamp(28px, 4vw, 44px);
+  }
+
+  .modal--split .modal__body {
+    gap: 20px;
+    /* Extra right padding keeps scrolled text clear of the close button. */
+    padding: var(--modal-pad) calc(var(--modal-pad) + 28px) var(--modal-pad) var(--modal-pad);
+  }
+
+  .modal__close {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line-ink-bold);
+    background: var(--color-cream);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .modal__close :global(svg) {
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .modal__close:hover :global(svg),
+    .modal__close:focus-visible :global(svg) {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Mobile: the bio modal fills the screen, with the same 16px gap on every side. */
+  @media (max-width: 767px) {
+    .modal--split {
+      height: calc(100dvh - 32px);
+      max-height: none;
+    }
+
+    .modal--split .modal__scroll {
+      height: 100%;
+      --modal-max-h: 100%;
+    }
+  }
+
+  /* Stacked layout on narrow screens: photo scrolls with the text. */
+  @media (max-width: 719px) {
+    .modal--split .modal__scroll {
+      grid-template-columns: 1fr;
+    }
+
+    .modal__media {
+      position: static;
+      padding: var(--modal-pad) var(--modal-pad) 0;
+    }
+  }
+</style>

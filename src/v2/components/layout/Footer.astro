@@ -1,0 +1,200 @@
+---
+import { getDictionary, type Locale } from '../../../i18n';
+import { sections, site } from '../../../data/site';
+import Logo from '../ui/Logo.astro';
+import RollText from '../ui/RollText.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<footer class="footer">
+  <div class="footer__grid container" data-stagger>
+    <div class="footer__brand">
+      <Logo variant="light" height={36} alt={site.name} />
+      <p class="footer__tagline">{t.footer.tagline}</p>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__title">{t.footer.locationTitle}</h3>
+      <a class="footer__address" href={site.mapsUrl} target="_blank" rel="noopener">
+        <RollText text={site.address.street} />
+        <RollText text={site.address.city} />
+      </a>
+      <button type="button" class="footer__link-btn" data-modal-open="rdv">
+        <RollText text={t.common.bookLong} />
+        <span class="footer__arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__title">{t.footer.contactTitle}</h3>
+      <RollText text={t.info.phone} />
+      <RollText text={t.info.email} />
+    </div>
+
+    <nav class="footer__col" aria-label={t.footer.sitemapLabel}>
+      <h3 class="footer__title">{t.footer.sitemapTitle}</h3>
+      {
+        sections.map((id) => (
+          <a href={`#${id}`}>
+            <RollText text={t.nav.items[id]} />
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="footer__legal container" data-fade>
+    <span class="footer__copyright">{t.footer.copyright}</span>
+    <div class="footer__legal-links">
+      <span>{t.footer.rpps}</span>
+      <a href={site.orderUrl}>{t.footer.order}</a>
+      <a href={site.legalUrl}>{t.footer.legal}</a>
+      <a href={site.privacyUrl}>{t.footer.privacy}</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    /* Content waiting to fade up sits lower; don't let it extend the page. */
+    overflow: clip;
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 44px 40px;
+    align-items: start;
+    padding-top: 72px;
+    padding-bottom: 56px;
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .footer__brand :global(.logo) {
+    align-self: flex-start;
+  }
+
+  .footer__tagline {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: rgba(253, 241, 226, 0.8);
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--fs-sm);
+  }
+
+  .footer__col a {
+    color: var(--color-cream);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .footer__address {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .footer__title {
+    margin: 0 0 6px;
+    font-size: var(--fs-3xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-rose);
+  }
+
+  .footer__link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--color-cream);
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px 32px;
+    padding-top: 24px;
+    padding-bottom: 40px;
+    border-top: 1px solid var(--line-cream-soft);
+    font-size: var(--fs-2xs);
+    color: rgba(253, 241, 226, 0.7);
+  }
+
+  /* Arrow slides right and picks up the hover colour; the text rolls (RollText). */
+  .footer__arrow {
+    display: inline-block;
+    transition:
+      transform var(--dur-slow) var(--ease),
+      color var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .footer__link-btn:hover {
+      transform: translateY(-4px);
+    }
+
+    .footer__link-btn:hover .footer__arrow,
+    .footer__link-btn:focus-visible .footer__arrow {
+      transform: translateX(4px);
+      color: var(--color-rose);
+    }
+  }
+
+  /* Mobile: half the space under the columns. */
+  @media (max-width: 767px) {
+    .footer__grid {
+      padding-bottom: 28px;
+    }
+  }
+
+  .footer__copyright {
+    font-weight: var(--weight-bold);
+  }
+
+  .footer__legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+  }
+
+  .footer__legal-links a {
+    color: rgba(253, 241, 226, 0.7);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .footer__legal-links a:hover {
+      color: var(--color-rose);
+    }
+  }
+</style>

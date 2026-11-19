@@ -1,0 +1,149 @@
+---
+import { formatPrice, getDictionary, intlLocale, type Locale } from '../../../i18n';
+import { prices } from '../../../data/content';
+import Section from '../ui/Section.astro';
+import Heading from '../ui/Heading.astro';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = getDictionary(lang);
+---
+
+<Section id="tarifs" labelledby="tarifs-title" pad="sm" innerClass="split">
+  <Heading id="tarifs-title" parts={t.pricing.title} />
+
+  <div class="prices">
+    <table class="prices__table">
+      <caption class="visually-hidden">{t.pricing.caption}</caption>
+      <tbody>
+        {
+          prices.map((row) => (
+            <tr>
+              <th scope="row">{t.pricing.items[row.key]}</th>
+              <td class="prices__duration">{row.duration}</td>
+              <td class="prices__amount" data-count={row.amount} data-count-locale={intlLocale[lang]}>
+                {formatPrice(row.amount, lang)}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</Section>
+
+<script>
+  /**
+   * Prices count up from 0 over 2s when the table scrolls into view, and reset
+   * once the section has gone back below the viewport (like the other entrance
+   * animations). The real price is in the HTML, so no-JS and reduced motion
+   * just show it.
+   */
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const cells = [...document.querySelectorAll<HTMLElement>('[data-count]')];
+  const table = cells[0]?.closest('table');
+  const section = table?.closest('section');
+
+  gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    if (!table || !section) return;
+    const counters = cells.map((cell) => {
+      const target = Number(cell.dataset.count);
+      const format = new Intl.NumberFormat(cell.dataset.countLocale, {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+      }).format;
+      // Lock the cell to the final price's width (in em, so it scales with the
+      // font) so the columns don't shift as digits are added.
+      const fontSize = parseFloat(getComputedStyle(cell).fontSize);
+      cell.style.width = `${cell.getBoundingClientRect().width / fontSize}em`;
+      const state = { value: 0 };
+      const render = () => (cell.textContent = format(Math.round(state.value)));
+      render();
+      return gsap.to(state, { value: target, duration: 2, ease: 'power2.out', paused: true, onUpdate: render });
+    });
+
+    ScrollTrigger.create({
+      trigger: table,
+      start: 'top 80%',
+      onEnter: () => counters.forEach((c) => c.restart()),
+    });
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top bottom',
+      onLeaveBack: () => counters.forEach((c) => c.pause(0)),
+    });
+
+    // Restore the real prices if motion gets turned off mid-visit.
+    return () => counters.forEach((c) => c.progress(1));
+  });
+</script>
+
+<style>
+  .prices {
+    padding: 12px clamp(20px, 3vw, 36px);
+    border-radius: var(--radius-xl);
+    background: var(--color-forest);
+    color: var(--color-cream);
+  }
+
+  .prices__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-lg);
+  }
+
+  .prices__table th,
+  .prices__table td {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line-cream);
+    font-weight: var(--weight-regular);
+    text-align: left;
+  }
+
+  .prices__table tr:last-child th,
+  .prices__table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .prices__duration {
+    color: var(--color-sage);
+  }
+
+  .prices__table .prices__amount {
+    /* Equal-width digits so the price doesn't jitter while counting. */
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    font-size: 22px;
+    font-weight: var(--weight-bold);
+  }
+
+  @media (max-width: 767px) {
+    .prices__table {
+      font-size: var(--fs-sm);
+    }
+
+    .prices__table th,
+    .prices__table td {
+      padding-block: 16px;
+    }
+
+    /* Breathing room between duration and price on narrow screens. */
+    .prices__table .prices__duration {
+      padding-inline: 12px;
+      white-space: nowrap;
+    }
+
+    .prices__table .prices__amount {
+      font-size: var(--fs-md);
+      white-space: nowrap;
+    }
+  }
+</style>
