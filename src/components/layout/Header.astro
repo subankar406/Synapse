@@ -31,20 +31,19 @@ const t = getDictionary(lang);
     </div>
   </div>
 
-  <!-- Full-screen menu (below 1180px). The booking CTA lives at its bottom. -->
+  <!-- Drop-down menu (below 1180px): a panel under the header bar, as in the mobile design. -->
   <nav id="mobile-menu" class="menu" aria-label={t.common.menu} data-open="false" inert>
-    <div class="menu__links container">
-      {
-        sections.map((id, i) => (
-          <a class="navlink menu__link" href={`#${id}`} style={`--i: ${i}`} data-menu-close>
-            {t.nav.items[id]}
-          </a>
-        ))
-      }
-    </div>
-    <div class="menu__footer container">
-      <LangSwitch lang={lang} compact />
-      <Button variant="cream" modal="rdv" block class="menu__cta">{t.common.book}</Button>
+    <div class="menu__inner">
+      <div class="menu__links container">
+        {
+          sections.map((id, i) => (
+            <a class="navlink menu__link" href={`#${id}`} style={`--i: ${i}`} data-menu-close>
+              {t.nav.items[id]}
+            </a>
+          ))
+        }
+        <LangSwitch lang={lang} compact />
+      </div>
     </div>
   </nav>
 </header>
@@ -58,7 +57,6 @@ const t = getDictionary(lang);
     menu.dataset.open = String(open);
     menu.inert = !open;
     toggle.setAttribute('aria-expanded', String(open));
-    document.documentElement.classList.toggle('menu-open', open);
   };
 
   toggle?.addEventListener('click', () => setOpen(menu?.dataset.open !== 'true'));
@@ -108,10 +106,12 @@ const t = getDictionary(lang);
     text-decoration: none;
   }
 
-  .navlink:hover {
-    color: var(--color-white);
-    text-decoration: underline;
-    text-underline-offset: 6px;
+  @media (hover: hover) and (min-width: 992px) {
+    .navlink:hover {
+      color: var(--color-white);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
   }
 
   /* Hamburger that morphs into a cross. */
@@ -155,46 +155,38 @@ const t = getDictionary(lang);
     transform: translateY(-1px) rotate(-45deg);
   }
 
-  /* Full-screen menu: sits under the header bar and fills the viewport. */
-  .header__bar {
-    position: relative;
-    z-index: 2;
-    background: var(--color-burgundy);
-  }
-
+  /* Drop-down menu: overlays the page just under the header bar (height animates via grid rows). */
   .menu {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    display: none;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100dvh;
-    padding-top: var(--header-h);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     background: var(--color-burgundy);
-    /* Slides down from the top when opened, back up when closed. */
-    transform: translateY(-100%);
+    display: none;
+    grid-template-rows: 0fr;
     visibility: hidden;
     transition:
-      transform 0.55s cubic-bezier(0.65, 0, 0.35, 1),
-      visibility 0.55s;
+      grid-template-rows 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+      visibility 0.45s;
   }
 
   .menu[data-open='true'] {
-    transform: none;
+    grid-template-rows: 1fr;
     visibility: visible;
   }
 
-  /* .container centres itself with auto margins; stretch it so content aligns left. */
-  .menu__links,
-  .menu__footer {
-    width: 100%;
+  .menu__inner {
+    min-height: 0;
+    overflow: hidden;
   }
 
+  /* .container centres itself with auto margins; stretch it so content aligns left. */
   .menu__links {
     display: flex;
     flex-direction: column;
-    padding-top: 16px;
+    width: 100%;
+    padding-top: 8px;
+    padding-bottom: 24px;
     border-top: 1px solid rgba(253, 241, 226, 0.2);
     font-size: var(--fs-menu);
     font-weight: var(--weight-bold);
@@ -203,31 +195,23 @@ const t = getDictionary(lang);
   .menu__link {
     padding: 12px 0;
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
     transition:
-      opacity 0.4s var(--ease),
-      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 0.35s var(--ease),
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .menu[data-open='true'] .menu__link {
     opacity: 1;
     transform: none;
-    transition-delay: calc(250ms + var(--i) * 45ms);
+    transition-delay: calc(120ms + var(--i) * 35ms);
   }
 
-  .menu__footer {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
-  }
-
-  .menu :global(.menu__cta) {
-    justify-content: center;
-  }
-
-  :global(html.menu-open) {
-    overflow: hidden;
+  @media (prefers-reduced-motion: reduce) {
+    .menu,
+    .menu__link {
+      transition: none;
+    }
   }
 
   @media (max-width: 1180px) {
@@ -240,7 +224,7 @@ const t = getDictionary(lang);
     }
 
     .menu {
-      display: flex;
+      display: grid;
     }
   }
 </style>

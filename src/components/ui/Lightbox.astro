@@ -1,6 +1,7 @@
 ---
 import { getDictionary, type Locale } from '../../i18n';
 import Icon from './Icon.astro';
+import IconSwap from './IconSwap.astro';
 
 /**
  * One shared image lightbox for the page. Any element with
@@ -17,19 +18,19 @@ const t = getDictionary(lang);
 ---
 
 <dialog class="lightbox" aria-label={t.lightbox.label} data-lightbox-dialog>
-  <button type="button" class="lightbox__close" aria-label={t.common.close} data-lightbox-close>
-    <Icon name="close" size={20} strokeWidth={2.2} />
-  </button>
-
   <figure class="lightbox__figure">
     <!-- Stage wraps the image so the arrows sit just outside its edges at any size. -->
     <div class="lightbox__stage">
       <img class="lightbox__img" alt="" data-lightbox-img />
+      <!-- Pinned to the viewport corner on desktop; sits just above the image on mobile. -->
+      <button type="button" class="lightbox__close" aria-label={t.common.close} data-lightbox-close>
+        <Icon name="close" size={20} strokeWidth={2.2} />
+      </button>
       <button type="button" class="lightbox__nav lightbox__nav--prev" aria-label={t.lightbox.prev} data-lightbox-prev>
-        <Icon name="arrow-left" size={22} strokeWidth={2.2} />
+        <IconSwap name="arrow-left" size={22} strokeWidth={2.2} direction="left" clip="parent" />
       </button>
       <button type="button" class="lightbox__nav lightbox__nav--next" aria-label={t.lightbox.next} data-lightbox-next>
-        <Icon name="arrow-right" size={22} strokeWidth={2.2} />
+        <IconSwap name="arrow-right" size={22} strokeWidth={2.2} direction="right" clip="parent" />
       </button>
     </div>
   </figure>
@@ -110,6 +111,8 @@ const t = getDictionary(lang);
     background: transparent;
     color: var(--color-cream);
     overflow: hidden;
+    /* Touch gestures are ours (swipe between images), never page scroll. */
+    touch-action: none;
   }
 
   .lightbox[open] {
@@ -152,6 +155,11 @@ const t = getDictionary(lang);
     cursor: pointer;
   }
 
+  /* Clips the arrow as it slides out (IconSwap). */
+  .lightbox__nav {
+    overflow: hidden;
+  }
+
   .lightbox__nav[hidden] {
     display: none;
   }
@@ -182,11 +190,14 @@ const t = getDictionary(lang);
     right: -72px;
   }
 
-  .lightbox__nav:hover {
-    transform: translateY(-50%) scale(1.06);
+  @media (hover: hover) and (min-width: 992px) {
+    .lightbox__nav:hover {
+      transform: translateY(calc(-50% - 2px));
+    }
   }
 
   .lightbox__close {
+    position: fixed;
     top: 32px;
     right: 40px;
     width: 48px;
@@ -200,8 +211,10 @@ const t = getDictionary(lang);
     transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .lightbox__close:hover :global(svg) {
-    transform: rotate(360deg);
+  @media (hover: hover) and (min-width: 992px) {
+    .lightbox__close:hover :global(svg) {
+      transform: rotate(360deg);
+    }
   }
 
   @media (max-width: 767px) {
@@ -218,12 +231,18 @@ const t = getDictionary(lang);
       transform: none;
     }
 
-    .lightbox__nav:hover {
-      transform: none;
-    }
-
     .lightbox__nav--prev {
       left: calc(50% - 52px);
+    }
+
+    /* Just above the image, lined up with its right edge (16px from the screen edge). */
+    .lightbox__close {
+      position: absolute;
+      top: auto;
+      bottom: calc(100% + 12px);
+      right: 0;
+      width: 44px;
+      height: 44px;
     }
 
     .lightbox__nav--next {
@@ -232,6 +251,16 @@ const t = getDictionary(lang);
 
     .lightbox__figure {
       padding-bottom: 120px;
+    }
+  }
+
+  /* Small phones: a square image filling the width. */
+  @media (max-width: 479px) {
+    .lightbox__img {
+      width: calc(100vw - 2 * var(--lb-pad-x));
+      max-height: none;
+      aspect-ratio: 1;
+      object-fit: cover;
     }
   }
 </style>

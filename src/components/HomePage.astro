@@ -16,6 +16,8 @@ import CtaBand from './sections/CtaBand.astro';
 import BookingModal from './modals/BookingModal.astro';
 import PhysioModal from './modals/PhysioModal.astro';
 import Lightbox from './ui/Lightbox.astro';
+import Button from './ui/Button.astro';
+import { getDictionary } from '../i18n';
 
 /** The one-page site, composed from sections. Rendered once per locale. */
 interface Props {
@@ -23,6 +25,7 @@ interface Props {
 }
 
 const { lang } = Astro.props;
+const t = getDictionary(lang);
 ---
 
 <BaseLayout lang={lang}>
@@ -40,7 +43,38 @@ const { lang } = Astro.props;
   </main>
   <Footer lang={lang} />
 
+  <!-- Mobile only: booking button pinned to the bottom of the screen. -->
+  <div class="mobile-cta">
+    <Button modal="rdv" class="mobile-cta__btn">{t.common.book}</Button>
+  </div>
+
   <BookingModal lang={lang} />
   {team.map((physio) => <PhysioModal lang={lang} physio={physio} />)}
   <Lightbox lang={lang} />
 </BaseLayout>
+
+<style>
+  .mobile-cta {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .mobile-cta {
+      position: sticky;
+      bottom: 0;
+      z-index: 30;
+      display: flex;
+      padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+      background: rgba(253, 241, 226, 0.96);
+      border-top: 1px solid rgba(25, 0, 6, 0.08);
+    }
+
+    .mobile-cta :global(.mobile-cta__btn) {
+      flex: 1;
+      justify-content: center;
+      --btn-py: 16px;
+      --btn-px: 16px;
+      --btn-fs: var(--fs-base);
+    }
+  }
+</style>

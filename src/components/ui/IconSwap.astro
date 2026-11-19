@@ -1,0 +1,86 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+
+/**
+ * Hover effect for arrow icons: on hover of the surrounding link/button the
+ * icon slides out in `direction` and a copy slides in from behind. Reverses
+ * on hover out. The window is the icon's own box (overflow hidden), unless
+ * `clip="parent"`, where the icon travels to the edge of its button instead
+ * (e.g. round arrow buttons, which clip with their own overflow).
+ */
+type Direction = 'left' | 'right' | 'up-right';
+
+interface Props {
+  name: IconName;
+  size?: number;
+  strokeWidth?: number;
+  direction?: Direction;
+  clip?: 'self' | 'parent';
+}
+
+const { name, size = 24, strokeWidth = 2, direction = 'right', clip = 'self' } = Astro.props;
+const offset = { left: [-1, 0], right: [1, 0], 'up-right': [1, -1] }[direction];
+---
+
+<span
+  class:list={['icon-swap', `icon-swap--${clip}`]}
+  style={`--swap-size: ${size}px; --swap-x: ${offset[0]}; --swap-y: ${offset[1]};`}
+  aria-hidden="true"
+>
+  <span class="icon-swap__face"><Icon name={name} size={size} strokeWidth={strokeWidth} /></span>
+  <span class="icon-swap__face icon-swap__face--next"><Icon name={name} size={size} strokeWidth={strokeWidth} /></span>
+</span>
+
+<style>
+  .icon-swap {
+    /* How far a face travels: its own box, or past the edge of the parent button. */
+    --swap-dist: 100%;
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    width: var(--swap-size);
+    height: var(--swap-size);
+  }
+
+  .icon-swap--self {
+    overflow: hidden;
+  }
+
+  .icon-swap--parent {
+    --swap-dist: 200%;
+  }
+
+  .icon-swap__face {
+    display: flex;
+    transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .icon-swap__face--next {
+    position: absolute;
+    inset: 0;
+    transform: translate(
+      calc(var(--swap-x) * var(--swap-dist) * -1),
+      calc(var(--swap-y) * var(--swap-dist) * -1)
+    );
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    :global(:is(a, button):hover) .icon-swap__face,
+    :global(:is(a, button):focus-visible) .icon-swap__face {
+      transform: translate(calc(var(--swap-x) * var(--swap-dist)), calc(var(--swap-y) * var(--swap-dist)));
+    }
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    :global(:is(a, button):hover) .icon-swap__face--next,
+    :global(:is(a, button):focus-visible) .icon-swap__face--next {
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon-swap__face {
+      transition: none;
+    }
+  }
+</style>

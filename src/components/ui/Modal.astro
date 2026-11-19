@@ -125,15 +125,45 @@ const { id, labelledby, closeLabel, size = 'sm', split = false } = Astro.props;
     transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .modal__close:hover :global(svg),
-  .modal__close:focus-visible :global(svg) {
-    transform: rotate(360deg);
+  @media (hover: hover) and (min-width: 992px) {
+    .modal__close:hover :global(svg),
+    .modal__close:focus-visible :global(svg) {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Mobile (per design): up to the viewport height minus 16px each side; the
+     portrait sits edge to edge on a white panel above the text. */
+  @media (max-width: 767px) {
+    .modal--split .modal__scroll {
+      --modal-max-h: calc(100dvh - 32px);
+    }
+
+    .modal--split .modal__media {
+      position: relative;
+      min-height: 320px;
+      padding: 0;
+      background: var(--color-white);
+    }
+
+    .modal--split .modal__media :global(.profile__portrait) {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      aspect-ratio: auto;
+      object-fit: contain;
+      object-position: center bottom;
+      border-radius: 0;
+    }
+
+    .modal--split .modal__body {
+      padding: var(--modal-pad);
+    }
   }
 
   /* Stacked layout on narrow screens: photo scrolls with the text. */
   @media (max-width: 719px) {
     .modal--split .modal__scroll {
-      --modal-max-h: 85vh;
       grid-template-columns: 1fr;
     }
 

@@ -30,8 +30,33 @@ a {
   color: var(--color-primary);
 }
 
-a:hover {
-  color: var(--color-primary-hover);
+@media (hover: hover) and (min-width: 992px) {
+  a:hover {
+    color: var(--color-primary-hover);
+  }
+}
+
+/* Address text linking to Google Maps; the text itself carries the RollText hover. */
+.address-link,
+.address-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.address-link {
+  --roll-hover-color: var(--color-primary);
+}
+
+/* Anything clickable shows the hand cursor. */
+a[href],
+button:not(:disabled),
+summary,
+label[for],
+select,
+[role='button'],
+[data-modal-open],
+[data-lightbox] {
+  cursor: pointer;
 }
 
 section[id] {
@@ -115,10 +140,5 @@ html.anim:not(.anim-ready) footer {
 @media (max-width: 767px) {
   .hide-mobile {
     display: none !important;
-  }
-
-  /* Mobile body copy: every paragraph at 1rem, overriding component sizes. */
-  p {
-    font-size: 1rem !important;
   }
 }

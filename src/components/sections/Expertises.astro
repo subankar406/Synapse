@@ -4,7 +4,7 @@ import { expertiseImages } from '../../data/content';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import Media from '../ui/Media.astro';
-import Icon from '../ui/Icon.astro';
+import IconSwap from '../ui/IconSwap.astro';
 
 interface Props {
   lang: Locale;
@@ -34,10 +34,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
       }
     </div>
     <button class="carousel__arrow carousel__arrow--prev" type="button" aria-label={t.expertises.prev} data-prev hidden>
-      <Icon name="arrow-left" size={22} strokeWidth={2.2} />
+      <IconSwap name="arrow-left" size={24} strokeWidth={2.2} direction="left" clip="parent" />
     </button>
     <button class="carousel__arrow carousel__arrow--next" type="button" aria-label={t.expertises.next} data-next>
-      <Icon name="arrow-right" size={24} strokeWidth={2.2} />
+      <IconSwap name="arrow-right" size={24} strokeWidth={2.2} direction="right" clip="parent" />
     </button>
   </div>
 
@@ -124,6 +124,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   /* Rounded viewport: cards are clipped cleanly as they slide out. */
   .carousel {
     position: relative;
+    /* Lets the arrows size their offset from the carousel width (cqw). */
+    container-type: inline-size;
     border-radius: var(--radius-lg);
     overflow: clip;
   }
@@ -182,14 +184,31 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   .carousel__arrow {
     position: absolute;
-    top: 138px;
+    /* Centred on the card image: card width (as in --card-w) × 3/4 aspect ÷ 2. */
+    top: calc(min(370px, 82cqw) * 0.375);
     transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
     border: 0;
     border-radius: var(--radius-pill);
+    /* Clips the arrow as it slides out (IconSwap). */
+    overflow: hidden;
     cursor: pointer;
+    /* Both arrows: cream with a forest icon, burgundy on hover. */
+    background: var(--color-cream);
+    color: var(--color-forest);
+    transition:
+      background-color var(--dur-slow) var(--ease),
+      color var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .carousel__arrow:hover,
+    .carousel__arrow:focus-visible {
+      background: var(--color-burgundy);
+      color: var(--color-cream);
+    }
   }
 
   .carousel__arrow[hidden] {
@@ -198,19 +217,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   .carousel__arrow--prev {
     left: 14px;
-    width: 52px;
-    height: 52px;
-    background: var(--color-cream);
-    color: var(--color-forest);
-    box-shadow: var(--shadow-float);
+    width: 60px;
+    height: 60px;
+    box-shadow: var(--shadow-float-strong);
   }
 
   .carousel__arrow--next {
     right: 14px;
     width: 60px;
     height: 60px;
-    background: var(--color-burgundy);
-    color: var(--color-cream);
     box-shadow: var(--shadow-float-strong);
   }
 
@@ -242,14 +257,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   @media (max-width: 767px) {
-    .carousel__arrow {
-      top: 96px;
-    }
-
     .carousel__arrow--prev {
       left: 10px;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
     }
 
     .carousel__arrow--next {
@@ -258,9 +269,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
       height: 40px;
     }
 
+    .carousel__arrow :global(.icon-swap) {
+      width: 18px;
+      height: 18px;
+    }
+
     .carousel__arrow :global(svg) {
       width: 18px;
       height: 18px;
     }
   }
+
 </style>

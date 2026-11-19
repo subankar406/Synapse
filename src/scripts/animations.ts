@@ -122,8 +122,23 @@ const letters = (el: Element) =>
     { opacity: 1, yPercent: 0, duration: CHARS.duration, ease: CHARS.ease, stagger: CHARS.stagger },
   );
 
+/**
+ * Once faded in, the inline transform is cleared so CSS hover transforms
+ * (e.g. the buttons' 2px lift) work again. Reversing re-applies it as needed.
+ */
 const fadeUp = (targets: Element | Element[], stagger = 0) =>
-  gsap.fromTo(targets, { opacity: 0, y: FADE.y }, { opacity: 1, y: 0, duration: FADE.duration, ease: FADE.ease, stagger });
+  gsap.fromTo(
+    targets,
+    { opacity: 0, y: FADE.y },
+    {
+      opacity: 1,
+      y: 0,
+      duration: FADE.duration,
+      ease: FADE.ease,
+      stagger,
+      onComplete: () => gsap.set(targets, { clearProps: 'transform' }),
+    },
+  );
 
 /** Direct children of a scope that should get the automatic fade. */
 function autoFadeTargets(scope: Element): Element[] {

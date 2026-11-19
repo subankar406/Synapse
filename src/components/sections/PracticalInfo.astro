@@ -4,6 +4,9 @@ import { site } from '../../data/site';
 import Section from '../ui/Section.astro';
 import Heading from '../ui/Heading.astro';
 import MapEmbed from '../ui/MapEmbed.astro';
+import RollText from '../ui/RollText.astro';
+import Logo from '../ui/Logo.astro';
+import Button from '../ui/Button.astro';
 
 interface Props {
   lang: Locale;
@@ -18,12 +21,21 @@ const t = getDictionary(lang);
 
   <MapEmbed lang={lang} />
 
+  <!-- Mobile only (per design): clinic card with a booking button under the map. -->
+  <div class="map-card">
+    <div class="map-card__id">
+      <Logo variant="dark" height={24} alt={site.name} />
+      <span class="map-card__address">{site.address.short}</span>
+    </div>
+    <Button modal="rdv" class="map-card__btn">{t.common.book}</Button>
+  </div>
+
   <div class="contact" data-stagger>
     <div class="contact__col contact__col--primary">
       <h3 class="contact__title">{t.practical.contactTitle}</h3>
-      <span>{site.address.full}</span>
-      <span>{t.info.phone}</span>
-      <span>{t.info.email}</span>
+      <a class="address-link" href={site.mapsUrl} target="_blank" rel="noopener"><RollText text={site.address.full} /></a>
+      <RollText text={t.info.phone} />
+      <RollText text={t.info.email} />
     </div>
     <div class="contact__col contact__col--secondary">
       <h3 class="contact__title">{t.practical.hoursTitle}</h3>
@@ -51,10 +63,54 @@ const t = getDictionary(lang);
 
   .contact__col--primary {
     --accent: var(--color-primary);
+    --roll-hover-color: var(--color-primary);
+    align-items: flex-start;
   }
 
   .contact__col--secondary {
     --accent: var(--color-secondary);
+  }
+
+  .map-card {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .map-card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 16px;
+      border: 1.5px solid var(--color-burgundy);
+      border-radius: 20px;
+      background: var(--color-cream);
+    }
+
+    .map-card__id {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .map-card__id :global(.brand) {
+      align-self: flex-start;
+    }
+
+    .map-card__address {
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: var(--weight-bold);
+    }
+
+    .map-card :global(.map-card__btn) {
+      white-space: nowrap;
+      --btn-py: 12px;
+      --btn-px: 18px;
+      --btn-fs: 14px;
+    }
   }
 
   .contact__title {

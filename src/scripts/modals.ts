@@ -30,3 +30,34 @@ document.addEventListener('click', (event) => {
     target.close();
   }
 });
+
+/**
+ * Page scroll lock while any <dialog> (bio modal, lightbox, booking…) is open.
+ * Wheel, touch and keyboard scrolling are blocked instead of setting
+ * `overflow: hidden`, so the page scrollbar stays visible and nothing shifts.
+ * Scrolling still works inside a modal's own scroll area ([data-modal-scroll])
+ * while it has content to scroll; `overscroll-behavior: contain` there stops
+ * it from chaining to the page at the ends.
+ */
+const openDialog = () => document.querySelector<HTMLDialogElement>('dialog[open]');
+
+function scrollAreaOf(target: EventTarget | null): HTMLElement | null {
+  const area = target instanceof Element ? target.closest<HTMLElement>('[data-modal-scroll]') : null;
+  return area && area.scrollHeight > area.clientHeight ? area : null;
+}
+
+const blockScroll = (event: Event) => {
+  if (openDialog() && !scrollAreaOf(event.target)) event.preventDefault();
+};
+
+document.addEventListener('wheel', blockScroll, { passive: false });
+document.addEventListener('touchmove', blockScroll, { passive: false });
+
+const SCROLL_KEYS = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+document.addEventListener('keydown', (event) => {
+  if (!SCROLL_KEYS.has(event.key) || !openDialog()) return;
+  const target = event.target as HTMLElement;
+  // Let keys do their job in form fields and on buttons (Space activates them).
+  if (target.closest('input, textarea, select, button, a, [contenteditable]')) return;
+  if (!scrollAreaOf(target) && !scrollAreaOf(document.activeElement)) event.preventDefault();
+});

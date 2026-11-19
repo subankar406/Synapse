@@ -1,6 +1,7 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 import Icon, { type IconName } from './Icon.astro';
+import IconSwap from './IconSwap.astro';
 
 /**
  * Pill button. Renders an <a> when `href` is set, otherwise a <button>.
@@ -37,6 +38,10 @@ const {
 } = Astro.props;
 
 const classes = ['btn', `btn--${variant}`, `btn--${size}`, block && 'btn--block', className];
+
+/** Arrow icons slide out and back in on hover; the plus spins. */
+const swap = { external: 'up-right', 'arrow-right': 'right', 'arrow-left': 'left' } as const;
+const swapDirection = icon && icon in swap ? swap[icon as keyof typeof swap] : undefined;
 const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noopener' } : {};
 ---
 
@@ -44,12 +49,14 @@ const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noop
   href ? (
     <a class:list={classes} href={href} {...linkAttrs} {...rest}>
       <slot />
-      {icon && <Icon name={icon} size={iconSize} />}
+      {icon && swapDirection && <IconSwap name={icon} size={iconSize} direction={swapDirection} />}
+      {icon && !swapDirection && <Icon name={icon} size={iconSize} class={`btn__icon btn__icon--${icon}`} />}
     </a>
   ) : (
     <button class:list={classes} type="button" data-modal-open={modal} {...rest}>
       <slot />
-      {icon && <Icon name={icon} size={iconSize} strokeWidth={2.2} />}
+      {icon && swapDirection && <IconSwap name={icon} size={iconSize} strokeWidth={2.2} direction={swapDirection} />}
+      {icon && !swapDirection && <Icon name={icon} size={iconSize} strokeWidth={2.2} class={`btn__icon btn__icon--${icon}`} />}
     </button>
   )
 }
@@ -73,10 +80,29 @@ const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noop
       color var(--dur) var(--ease);
   }
 
-  .btn:hover {
-    transform: translateY(-2px);
-    background: var(--btn-bg-hover);
-    color: var(--btn-fg-hover);
+  @media (hover: hover) and (min-width: 992px) {
+    .btn:hover {
+      transform: translateY(-2px);
+      background: var(--btn-bg-hover);
+      color: var(--btn-fg-hover);
+    }
+  }
+
+  .btn :global(.btn__icon--plus) {
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @media (hover: hover) and (min-width: 992px) {
+    .btn:hover :global(.btn__icon--plus),
+    .btn:focus-visible :global(.btn__icon--plus) {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn :global(.btn__icon--plus) {
+      transition: none;
+    }
   }
 
   .btn--primary {
@@ -135,14 +161,6 @@ const linkAttrs: HTMLAttributes<'a'> = external ? { target: '_blank', rel: 'noop
   .btn {
     padding: calc(var(--btn-py) * var(--btn-scale, 1)) calc(var(--btn-px) * var(--btn-scale, 1));
     font-size: var(--btn-fs);
-  }
-
-  /* Mobile: buttons at 60% of their desktop padding, labels at 14px. */
-  @media (max-width: 767px) {
-    .btn {
-      --btn-scale: 0.6;
-      font-size: var(--fs-xs);
-    }
   }
 
   .btn--block {
